@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:WindowedApplication xmlns:mx="http://www.adobe.com/2006/mxml" layout="absolute" creationComplete="init();">
+  <mx:Script>
+    <![CDATA[
+      import com.google.code.actionscriptnativebridge.event.ResultEvent;
+      import com.google.code.actionscriptnativebridge.NativeBridge;
+      import com.google.code.actionscriptnativebridge.callback.ResultCallback;
+      import com.google.code.actionscriptnativebridge.callback.FaultCallback;
+      import com.google.code.actionscriptnativebridge.event.FaultEvent;
+      import com.google.code.actionscriptnativebridge.event.NativeRequestEvent;
+      import flash.sampler.NewObjectSample;
+      import mx.utils.ObjectUtil;
+      import mx.logging.LogEventLevel;
+      import mx.logging.LogEvent;
+      import mx.logging.targets.TraceTarget;
+      import mx.logging.ILoggingTarget;
+      import mx.logging.Log;
+
+      private function init():void
+      {
+        trace("testetete");
+        
+        trace(callFunction(function(a:int, b:int):int{return a+b;}, [1, 3]));
+        trace(callFunction(function(a:int, b:int):void{}, [1, 3]));
+        
+        var traceTarget:TraceTarget = new TraceTarget();
+        traceTarget.includeCategory = true;
+        traceTarget.includeDate = true;
+        traceTarget.includeLevel = true;
+        traceTarget.includeTime = true;
+        traceTarget.fieldSeparator = " | ";
+        traceTarget.level = LogEventLevel.ALL;
+        Log.addTarget(traceTarget);
+        
+        
+        NativeBridge.instance.addEventListener(
+          "soma",
+          function(e:NativeRequestEvent):void
+          {
+            e.resultData = e.arguments[0] + e.arguments[1];
+            e.sendResponse();
+          }
+        );
+        
+        NativeBridge.instance.addFunctionHandler(
+          "multiplica",
+          function(a:int, b:int):int
+          {
+            return a * b;
+          }
+        );
+        
+        
+        NativeBridge.instance.processa(1, "pcmnac");
+        
+        NativeBridge.instance.multiplica(
+          3, 2, 
+          new ResultCallback(
+            function(a:int):void
+            {
+              trace("Resultado: " + a);
+            }
+          ), 
+          new FaultCallback(
+            function(fe:FaultEvent):void
+            {
+              trace(fe.status);
+              trace(ObjectUtil.toString(fe.data));
+            }
+          )
+        );
+      
+      
+      NativeBridge.instance.sum(
+          3, 2, 
+          new ResultCallback(
+            function(re:ResultEvent):void
+            {
+              trace(re.data);
+            }
+          ), 
+          new FaultCallback(
+            function(fe:FaultEvent):void
+            {
+              trace(fe.status);
+              trace(ObjectUtil.toString(fe.data));
+            }
+          )
+        );
+      }
+      
+      private function callFunction(func:Function, args:Array):Object
+      {
+        return func.apply(null, args);
+      }
+      
+      private function testea():void {
+        trace("teste()");
+      }
+    ]]>
+  </mx:Script>
+</mx:WindowedApplication>
