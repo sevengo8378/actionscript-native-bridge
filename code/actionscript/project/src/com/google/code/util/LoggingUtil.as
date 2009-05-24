@@ -7,9 +7,6 @@ package com.google.code.util
   
   public class LoggingUtil
   {
-    public function LoggingUtil()
-    {
-    }
     
     public static function getClassLogger(object:Object):ILogger
     {

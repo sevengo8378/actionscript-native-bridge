@@ -2,22 +2,27 @@
 <mx:WindowedApplication xmlns:mx="http://www.adobe.com/2006/mxml" layout="absolute" creationComplete="init();">
   <mx:Script>
     <![CDATA[
+      import com.test.MyOtherClass;
+      import mx.containers.Tile;
       import com.google.code.actionscriptnativebridge.event.ResultEvent;
       import com.google.code.actionscriptnativebridge.NativeBridge;
       import com.google.code.actionscriptnativebridge.callback.ResultCallback;
       import com.google.code.actionscriptnativebridge.callback.FaultCallback;
       import com.google.code.actionscriptnativebridge.event.FaultEvent;
       import com.google.code.actionscriptnativebridge.event.NativeRequestEvent;
-      import flash.sampler.NewObjectSample;
-      import mx.utils.ObjectUtil;
+      
       import mx.logging.LogEventLevel;
       import mx.logging.LogEvent;
       import mx.logging.targets.TraceTarget;
       import mx.logging.ILoggingTarget;
       import mx.logging.Log;
+      import mx.utils.ObjectUtil;
 
       private function init():void
       {
+        
+        
+        
         trace("testetete");
         
         trace(callFunction(function(a:int, b:int):int{return a+b;}, [1, 3]));
@@ -32,6 +37,7 @@
         traceTarget.level = LogEventLevel.ALL;
         Log.addTarget(traceTarget);
         
+        new MyOtherClass().processa(1, "pcmnac++");
         
         NativeBridge.instance.addEventListener(
           "soma",

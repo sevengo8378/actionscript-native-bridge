@@ -100,9 +100,71 @@ package com.google.code.actionscriptnativebridge
       return __dispatcher.hasEventListener(type);
     }
     
-    flash.utils.flash_proxy override function callProperty(name:*, ...rest):*
+    public function callNativeMethod(name:String, args:Array):void
     {
       __logger.debug("Call to native method started.");
+      
+      var operation:String = name;
+      var arguments:Array = new Array();
+      var resultCallback:ResultCallback = null;
+      var faultCallback:FaultCallback = null;
+      
+/*      if (args.length == 1 && args[0] is Array)
+      {
+        args = args[0];
+      }*/
+      
+      if (args != null)
+      {
+        for each (var argument:* in args)
+        {
+          if (argument is ResultCallback)
+          {
+            __logger.debug("ResultCallback found.");
+            resultCallback = ResultCallback(argument);
+          }
+          else if(argument is FaultCallback)
+          {
+            __logger.debug("FaultCallback found.");
+            faultCallback = FaultCallback(argument);
+          }
+          else
+          {
+            arguments.push(argument);
+          }
+          
+        }
+
+      }
+      
+      if (Log.isInfo())
+      {
+        __logger.info(
+          "\nNative Operation:\n-----------------\nOperation: {0}, \nParameters: [{1}], \nResult Callback: {2}, \nFault Callback: {3}", 
+          operation, 
+          arguments, 
+          (resultCallback != null), 
+          (faultCallback != null)
+        );
+      }
+      
+      var requestId:int = __nextRequestId;
+      
+      var responder:NativeResponder = new NativeResponder(resultCallback, faultCallback);
+      __pushResponder(requestId, responder);
+      
+      var message:Object = new Object();
+      message.type = "REQUEST";
+      message.requestId = requestId;
+      message.operation = operation;
+      message.arguments = arguments;
+      
+      __connection.send(message);
+    }
+    
+    flash.utils.flash_proxy override function callProperty(name:*, ...rest):*
+    {
+      /*__logger.debug("Call to native method started.");
       
       var operation:String = name;
       var arguments:Array = new Array();
@@ -154,7 +216,8 @@ package com.google.code.actionscriptnativebridge
       message.operation = operation;
       message.arguments = arguments;
       
-      __connection.send(message);
+      __connection.send(message);*/
+      callNativeMethod(name, rest);
     }
     
     private static const __INSTANCE:NativeBridge = new NativeBridge();
