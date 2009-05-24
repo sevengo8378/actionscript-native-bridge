@@ -1,3 +1,5 @@
+package com.test;
+
 import com.google.code.actionscriptnativebridge.annotation.NativeMethod;
 import com.google.code.actionscriptnativebridge.annotation.NativeService;
 
@@ -18,7 +20,7 @@ public class MyOtherClass
   }
 
   @NativeMethod
-  public void processa(int i, String name)
+  public void processa(Integer i, String name)
   {
     System.out.println(name + " - " + i);
   }

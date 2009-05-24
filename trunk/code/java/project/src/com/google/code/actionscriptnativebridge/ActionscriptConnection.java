@@ -43,11 +43,13 @@ public class ActionscriptConnection implements Runnable
 
   public void sendMessage(Message message) throws IOException
   {
-    String messageString = __translator.stringFromMessage(message);
+    String messageString = __translator.stringFromMessage(message)
+        + "<[[com.google.code.actionscriptnativebridge.TERMINATOR]]>\u0000";
+
+    __logger.debug("Message sent: " + messageString);
+
     __output.write(messageString.getBytes());
 
-    __output.write("<[[com.google.code.actionscriptnativebridge.TERMINATOR]]>".getBytes());
-    __output.write(0);
     __output.flush();
   }
 
@@ -89,6 +91,7 @@ public class ActionscriptConnection implements Runnable
     catch (Exception e)
     {
       // TODO: handle exception
+      e.printStackTrace();
     }
   }
 
@@ -121,12 +124,18 @@ public class ActionscriptConnection implements Runnable
     do
     {
       codePoint = stream.read();
-      if (codePoint == 0)
+      // System.out.println(codePoint);
+      // TODO
+      if (codePoint <= 0)
+      {
         zeroByteRead = true;
+      }
       else
+      {
         buffer.appendCodePoint(codePoint);
+      }
     }
-    while (!zeroByteRead && buffer.length() < 100);
+    while (!zeroByteRead);
 
     String result = buffer.toString();
 

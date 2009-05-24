@@ -6,6 +6,8 @@ package com.google.code.actionscriptnativebridge
   import com.google.code.util.LoggingUtil;
   
   import mx.logging.ILogger;
+  import mx.logging.Log;
+  import mx.utils.ObjectUtil;
   
   public class NativeResponder
   {
@@ -21,6 +23,16 @@ package com.google.code.actionscriptnativebridge
       var data:Object = message.data;
       var status:int = message.statusCode;
       var callback:Callback = (status == 0) ? __resultCallback : __faultCallback;
+
+      if (Log.isDebug())
+      {
+        __logger.debug(
+          "Response received to requestId {0}:\nStatus: {1}\nData: {2} ",
+          requestId,
+          status,
+          ObjectUtil.toString(data)
+        );
+      }
 
       if (callback != null)
       {

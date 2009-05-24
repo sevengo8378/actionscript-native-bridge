@@ -62,6 +62,11 @@ public class MethodsMapper
     return __methodsMap.get(name);
   }
 
+  public static Method getMethod(String name, Object[] arguments)
+  {
+    return __methodsMap.get(name);
+  }
+
   private static Map<String, Method> __methodsMap = new HashMap<String, Method>();
 
   private static Log __logger = LogFactory.getLog(MethodsMapper.class);

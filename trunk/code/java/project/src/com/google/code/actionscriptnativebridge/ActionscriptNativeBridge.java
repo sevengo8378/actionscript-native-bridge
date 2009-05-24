@@ -2,7 +2,9 @@ package com.google.code.actionscriptnativebridge;
 
 import java.io.IOException;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang.ArrayUtils;
@@ -180,21 +182,53 @@ public class ActionscriptNativeBridge implements MessageListener
 
     Object result = null;
 
+    Class<?> declaringClass = null;
     // Gets a existing method.
-    Method method = MethodsMapper.getMethod(operation);
+    Method method = null;
+
+    if (operation.indexOf(GlobalConstraints.METHOD_SEPARATOR) != -1)
+    {
+      String[] parts = operation.split(GlobalConstraints.METHOD_SEPARATOR);
+      String className = parts[0];
+      String methodName = parts[1];
+
+      try
+      {
+        declaringClass = Class.forName(className);
+
+        // Gets argument types.
+        List<Class<?>> types = new ArrayList<Class<?>>();
+        for (Object argument : parameters)
+        {
+          types.add(argument.getClass());
+        }
+        final Class<?> parameterTypes[] = new Class<?>[types.size()];
+        types.toArray(parameterTypes);
+
+        method = declaringClass.getMethod(methodName, parameterTypes);
+      }
+      catch (Exception e)
+      {
+        __logger.error(e.getMessage());
+        e.printStackTrace();
+      }
+    }
+    else
+    {
+      method = MethodsMapper.getMethod(operation);
+      declaringClass = method.getDeclaringClass();
+    }
 
     if (method != null)
     {
       try
       {
-        System.out.println(method.getName());
+        __logger.debug("invoking " + method.getName());
 
-        Class<?> declaringClass = method.getDeclaringClass();
         Object declaringObject = declaringClass.newInstance();
 
         method.setAccessible(true);
         result = method.invoke(declaringObject, parameters);
-
       }
       catch (Exception e)
       {
@@ -204,7 +238,7 @@ public class ActionscriptNativeBridge implements MessageListener
     }
     else
     {
-      throw new MethodNotFoundException("Unknwon method...");
+      throw new MethodNotFoundException("Unknown method...");
     }
 
     return result;
