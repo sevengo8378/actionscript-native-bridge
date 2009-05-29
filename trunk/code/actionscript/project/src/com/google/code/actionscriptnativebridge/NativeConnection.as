@@ -17,8 +17,6 @@ package com.google.code.actionscriptnativebridge
   
   import mx.logging.ILogger;
   
-  [Event(name="activate", type="flash.events.Event")]
-  [Event(name="deactivate", type="flash.events.Event")]
   [Event(name="close", type="flash.events.Event")]
   [Event(name="ioError", type="flash.events.IOErrorEvent")]
   [Event(name="securityError", type="flash.events.SecurityErrorEvent")]
@@ -49,8 +47,6 @@ package com.google.code.actionscriptnativebridge
     {
       __socket = new Socket();
       
-      __socket.addEventListener(Event.ACTIVATE, __forwardEvent);
-      __socket.addEventListener(Event.DEACTIVATE, __forwardEvent);
       __socket.addEventListener(SecurityErrorEvent.SECURITY_ERROR, __forwardEvent);
       __socket.addEventListener(IOErrorEvent.IO_ERROR, __forwardEvent);
       __socket.addEventListener(Event.CLOSE, __forwardEvent);
@@ -73,33 +69,12 @@ package com.google.code.actionscriptnativebridge
 
     }
     
-    /**
-     * Recupera o terminador das mensagens trocadas.
-     * 
-     * @param O terminador das mensagens trocadas.
-     */ 
-    public function get messageTerminator():String
-    {
-      return __messageTerminator;
-    }
-    
-    /**
-     * Configura o terminador das mensagens trocadas.
-     * 
-     * @param Novo valor para o terminador das mensagens trocadas.
-     */
-    public function set messageTerminator(value:String):void
-    {
-      __messageTerminator = messageTerminator;
-    }
     
     private static var __logger:ILogger = LoggingUtil.getClassLogger(NativeConnection);
     
     /**
      * Terminador padrão para as mensagens recebidas do módulo background.
      */
-    private static const __DEFAULT_MESSAGE_TERMINATOR:String = "<[[com.google.code.actionscriptnativebridge.TERMINATOR]]>";
-    
     private var __translator:IMessageTranslator;
     
     /**
@@ -127,13 +102,6 @@ package com.google.code.actionscriptnativebridge
      * isso é necessário um buffer para armazenar esses bytes.
      */
     private var __responseDataBuffer:String = "";
-    
-    
-    
-    /**
-     * Terminador para as mensagens recebidas do módulo background.
-     */
-    private var __messageTerminator:String = __DEFAULT_MESSAGE_TERMINATOR;
     
     /**
     * Passa o evento para frente.
@@ -171,7 +139,7 @@ package com.google.code.actionscriptnativebridge
           {
             // Se for 0, ou seja, o final de um bloco...
             // processa esse bloco.
-            __processMessageBlock(messageBlock);
+            __processMessageBlock(messageBlock, true);
             
             // Reinicia o bloco atual.
             messageBlock = new ByteArray();
@@ -189,11 +157,12 @@ package com.google.code.actionscriptnativebridge
     }
 
     /**
-     * Processa um bloco de bytes recebidos do servidor.
+     * Processes message blocks received from server.
      * 
-     * @param bytes ByteArray com o os bytes do token.
+     * @param bytes Message block bytes.
+     * @param finish Indicates if the end of message was reached.
      */
-    private function __processMessageBlock(bytes:ByteArray):void
+    private function __processMessageBlock(bytes:ByteArray, finish:Boolean = false):void
     {
       // Rewinds byte array cursor.
       bytes.position = 0;
@@ -205,21 +174,17 @@ package com.google.code.actionscriptnativebridge
 
         // Adiciona a mensagem ao buffer.
         __responseDataBuffer += receivedData;
-          
-        var terminatorIndex:int = __responseDataBuffer.indexOf(__messageTerminator);
         
-        // Verifica se encontrou o terminador e se ele está no final
-        if ((terminatorIndex > 0) && 
-            (terminatorIndex == (__responseDataBuffer.length - __messageTerminator.length)))
+        if (finish)
         {
-          var messageString:String = __responseDataBuffer.substring(0, terminatorIndex);
-            
+          var messageString:String = __responseDataBuffer;
           __responseDataBuffer = "";
-          __logger.info("Message received [{0}]: {1}", messageString.length, messageString);
           
+          __logger.info("Message received [{0}]: {1}", messageString.length, messageString);
           
           var receivedMessage:Object = __translator.messageFromString(messageString);
           var event:NativeMessageEvent = new NativeMessageEvent(NativeMessageEvent.MESSAGE_RECEIVED, receivedMessage);
+          
           dispatchEvent(event);
         }
       }

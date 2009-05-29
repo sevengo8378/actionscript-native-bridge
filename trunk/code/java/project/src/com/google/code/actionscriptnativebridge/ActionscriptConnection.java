@@ -25,7 +25,8 @@ public class ActionscriptConnection implements Runnable
     this(listener, new JsonMessageTranslator());
   }
 
-  public ActionscriptConnection(MessageListener listener, JsonMessageTranslator translator)
+  public ActionscriptConnection(MessageListener listener,
+      JsonMessageTranslator translator)
   {
     __listener = listener;
     __translator = translator;
@@ -43,8 +44,7 @@ public class ActionscriptConnection implements Runnable
 
   public void sendMessage(Message message) throws IOException
   {
-    String messageString = __translator.stringFromMessage(message)
-        + "<[[com.google.code.actionscriptnativebridge.TERMINATOR]]>\u0000";
+    String messageString = __translator.stringFromMessage(message) + "\u0000";
 
     __logger.debug("Message sent: " + messageString);
 
@@ -66,7 +66,8 @@ public class ActionscriptConnection implements Runnable
 
         if (__logger.isInfoEnabled())
         {
-          __logger.info("Client connected: " + __client.getRemoteSocketAddress());
+          __logger.info("Client connected: "
+              + __client.getRemoteSocketAddress());
         }
         __input = __client.getInputStream();
         __output = __client.getOutputStream();
