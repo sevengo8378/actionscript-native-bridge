@@ -20,14 +20,6 @@
 
       private function init():void
       {
-        
-        
-        
-        trace("testetete");
-        
-        trace(callFunction(function(a:int, b:int):int{return a+b;}, [1, 3]));
-        trace(callFunction(function(a:int, b:int):void{}, [1, 3]));
-        
         var traceTarget:TraceTarget = new TraceTarget();
         traceTarget.includeCategory = true;
         traceTarget.includeDate = true;
@@ -95,14 +87,6 @@
         );
       }
       
-      private function callFunction(func:Function, args:Array):Object
-      {
-        return func.apply(null, args);
-      }
-      
-      private function testea():void {
-        trace("teste()");
-      }
     ]]>
   </mx:Script>
 </mx:WindowedApplication>
