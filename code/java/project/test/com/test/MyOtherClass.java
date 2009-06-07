@@ -1,25 +1,25 @@
 package com.test;
 
-import com.google.code.actionscriptnativebridge.annotation.NativeMethod;
-import com.google.code.actionscriptnativebridge.annotation.NativeService;
+import com.google.code.actionscriptnativebridge.annotation.ActionScriptMethod;
+import com.google.code.actionscriptnativebridge.annotation.ActionScriptService;
 
-@NativeService
+@ActionScriptService
 public class MyOtherClass
 {
 
-  @NativeMethod
+  @ActionScriptMethod
   public int sum(int a, int b)
   {
     return a + b;
   }
 
-  @NativeMethod(name = "multiplica")
+  @ActionScriptMethod(name = "multiplica")
   public int mult(int a, int b)
   {
     return a * b;
   }
 
-  @NativeMethod
+  @ActionScriptMethod
   public void processa(Integer i, String name)
   {
     System.out.println(name + " - " + i);

@@ -11,17 +11,17 @@ import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.google.code.actionscriptnativebridge.ActionscriptConnection.MessageListener;
+import com.google.code.actionscriptnativebridge.ActionScriptConnection.MessageListener;
 import com.google.code.actionscriptnativebridge.exception.ExecutionException;
 import com.google.code.actionscriptnativebridge.exception.MethodNotFoundException;
 import com.google.code.actionscriptnativebridge.message.Message;
 import com.google.code.actionscriptnativebridge.message.RequestMessage;
 import com.google.code.actionscriptnativebridge.message.ResponseMessage;
 
-public class ActionscriptNativeBridge implements MessageListener
+public class ActionScriptNativeBridge implements MessageListener
 {
 
-  public static ActionscriptNativeBridge getInstance()
+  public static ActionScriptNativeBridge getInstance()
   {
     return __INSTANCE;
   }
@@ -99,17 +99,17 @@ public class ActionscriptNativeBridge implements MessageListener
 
   }
 
-  private static final ActionscriptNativeBridge __INSTANCE = new ActionscriptNativeBridge();
+  private static final ActionScriptNativeBridge __INSTANCE = new ActionScriptNativeBridge();
 
   private static int __currentRequestId = 1;
 
   private Map<Integer, Object> __pendingRequestMap = new HashMap<Integer, Object>();
 
-  private Log __logger = LogFactory.getLog(ActionscriptNativeBridge.class);
+  private Log __logger = LogFactory.getLog(ActionScriptNativeBridge.class);
 
-  private ActionscriptConnection __connection = new ActionscriptConnection(this);
+  private ActionScriptConnection __connection = new ActionScriptConnection(this);
 
-  private ActionscriptNativeBridge()
+  private ActionScriptNativeBridge()
   {
 
   }

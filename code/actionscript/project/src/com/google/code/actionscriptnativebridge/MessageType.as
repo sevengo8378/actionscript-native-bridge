@@ -3,21 +3,22 @@
 package com.google.code.actionscriptnativebridge
 {
   /**
-   * <p>Tipos de mensagens que podem ser recebidas da aplicação de background.
+   * <p>Message Types sent to and received from native módule.
    * </p>
    *
-   * @author <a href="mailto:pcmnac@cesar.org.br">pcmnac</a>.
+   * @author <a href="mailto:pcmnac@cesar.org.br">pcmnac++</a>.
    */
   public class MessageType
   {
     /**
-     * Representa uma resposta a uma requisição iniciada.
+     * A request message. 
      */
-    public static const RESPONSE:int = 0;
+    public static const REQUEST:String = "REQUEST";
     
     /**
-     * Representa uma notificação iniciada pelo módulo background. 
+     * A response message to a previously received request.
      */
-    public static const REQUEST:int = 1;
+    public static const RESPONSE:String = "RESPONSE";
+    
   }
 }
