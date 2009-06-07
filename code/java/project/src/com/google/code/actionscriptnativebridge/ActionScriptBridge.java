@@ -139,6 +139,7 @@ public class ActionScriptBridge implements MessageListener
     {
       __connection.sendMessage(responseMessage);
 
+      // TODO: Remove this test code
       new Thread(new Runnable()
       {
 
@@ -176,16 +177,17 @@ public class ActionScriptBridge implements MessageListener
   public Object __executeOperation(String operation, Object[] parameters) throws MethodNotFoundException,
       ExecutionException
   {
-
     __logger.debug("Executing the operation \"" + operation + "\" with the parameters "
         + ArrayUtils.toString(parameters));
 
     Object result = null;
 
     Class<?> declaringClass = null;
+
     // Gets a existing method.
     Method method = null;
 
+    // If the method is a proxy method...
     if (operation.indexOf(GlobalConstraints.METHOD_SEPARATOR) != -1)
     {
       String[] parts = operation.split(GlobalConstraints.METHOD_SEPARATOR);
@@ -202,6 +204,7 @@ public class ActionScriptBridge implements MessageListener
         {
           types.add(argument.getClass());
         }
+
         final Class<?> parameterTypes[] = new Class<?>[types.size()];
         types.toArray(parameterTypes);
 
@@ -209,12 +212,12 @@ public class ActionScriptBridge implements MessageListener
       }
       catch (Exception e)
       {
-        __logger.error(e.getMessage());
-        e.printStackTrace();
+        __logger.error(e.getMessage(), e);
       }
     }
     else
     {
+      // Uses the facade mode...
       method = MethodsMapper.getMethod(operation);
       declaringClass = method.getDeclaringClass();
     }
@@ -234,7 +237,6 @@ public class ActionScriptBridge implements MessageListener
       {
         throw new ExecutionException(e);
       }
-
     }
     else
     {
