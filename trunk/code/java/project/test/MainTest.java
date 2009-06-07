@@ -3,7 +3,7 @@ import java.util.Map;
 
 import net.sf.json.JSONObject;
 
-import com.google.code.actionscriptnativebridge.ActionScriptNativeBridge;
+import com.google.code.actionscriptnativebridge.ActionScriptBridge;
 import com.google.code.actionscriptnativebridge.annotation.ActionScriptService;
 
 public class MainTest
@@ -15,7 +15,7 @@ public class MainTest
     try
     {
 
-      ActionScriptNativeBridge.getInstance().start();
+      ActionScriptBridge.getInstance().start();
 
       // JsonMessageTranslator translator = new JsonMessageTranslator();
       //
@@ -32,7 +32,7 @@ public class MainTest
       // {
       // RequestMessage message = (RequestMessage) translator.messageFromString(request);
       //
-      // ActionScriptNativeBridge.getInstance().__executeOperation(message.getOperation(),
+      // ActionScriptBridge.getInstance().__executeOperation(message.getOperation(),
       // message.getParameters());
       //
       // System.out.println();

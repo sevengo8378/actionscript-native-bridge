@@ -18,10 +18,10 @@ import com.google.code.actionscriptnativebridge.message.Message;
 import com.google.code.actionscriptnativebridge.message.RequestMessage;
 import com.google.code.actionscriptnativebridge.message.ResponseMessage;
 
-public class ActionScriptNativeBridge implements MessageListener
+public class ActionScriptBridge implements MessageListener
 {
 
-  public static ActionScriptNativeBridge getInstance()
+  public static ActionScriptBridge getInstance()
   {
     return __INSTANCE;
   }
@@ -99,17 +99,17 @@ public class ActionScriptNativeBridge implements MessageListener
 
   }
 
-  private static final ActionScriptNativeBridge __INSTANCE = new ActionScriptNativeBridge();
+  private static final ActionScriptBridge __INSTANCE = new ActionScriptBridge();
 
   private static int __currentRequestId = 1;
 
   private Map<Integer, Object> __pendingRequestMap = new HashMap<Integer, Object>();
 
-  private Log __logger = LogFactory.getLog(ActionScriptNativeBridge.class);
+  private Log __logger = LogFactory.getLog(ActionScriptBridge.class);
 
   private ActionScriptConnection __connection = new ActionScriptConnection(this);
 
-  private ActionScriptNativeBridge()
+  private ActionScriptBridge()
   {
 
   }
