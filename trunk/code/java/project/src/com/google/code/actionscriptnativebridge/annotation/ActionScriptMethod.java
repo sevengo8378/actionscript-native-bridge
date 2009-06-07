@@ -7,7 +7,7 @@ import java.lang.annotation.Target;
 
 @Target(value = ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
-public @interface NativeMethod
+public @interface ActionScriptMethod
 {
   String name() default "";
 }

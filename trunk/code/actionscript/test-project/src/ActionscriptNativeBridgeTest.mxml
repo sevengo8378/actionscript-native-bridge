@@ -31,20 +31,20 @@
         
         new MyOtherClass().processa(1, "pcmnac++");
         
-        NativeBridge.instance.addEventListener(
+        NativeBridge.instance.addFunctionHandler(
           "soma",
-          function(e:NativeRequestEvent):void
+          function(a:int, b:int):int
           {
-            e.resultData = e.arguments[0] + e.arguments[1];
-            e.sendResponse();
+            return a + b;
           }
         );
         
-        NativeBridge.instance.addFunctionHandler(
+        NativeBridge.instance.addAsynchronousHandler(
           "multiplica",
-          function(a:int, b:int):int
+          function(a:int, b:int, e:NativeRequestEvent):void
           {
-            return a * b;
+            e.resultData = a * b + 1;
+            e.sendResponse();
           }
         );
         

@@ -19,8 +19,6 @@ package com.google.code.actionscriptnativebridge
   import mx.logging.Log;
   import mx.utils.ObjectUtil;
   
-  [Event(name="activate", type="flash.events.Event")]
-  [Event(name="deactivate", type="flash.events.Event")]
   [Event(name="close", type="flash.events.Event")]
   [Event(name="ioError", type="flash.events.IOErrorEvent")]
   [Event(name="securityError", type="flash.events.SecurityErrorEvent")]
@@ -29,6 +27,7 @@ package com.google.code.actionscriptnativebridge
     extends Proxy 
     implements IEventDispatcher 
   {
+    
     public function NativeBridge()
     {
       if (__INSTANCE != null)
@@ -36,19 +35,25 @@ package com.google.code.actionscriptnativebridge
         throw new SingletonError();
       }
       __dispatcher = new EventDispatcher();
+      __nativeRequestDispatcher = new EventDispatcher();
       __connection = new NativeConnection();
-      
-      __connection.addEventListener(Event.ACTIVATE, __forwardEvent);
-      __connection.addEventListener(Event.DEACTIVATE, __forwardEvent);
+
+      // Sets up the listener for native connection.
       __connection.addEventListener(Event.CLOSE, __forwardEvent);
       __connection.addEventListener(IOErrorEvent.IO_ERROR, __forwardEvent);
       __connection.addEventListener(SecurityErrorEvent.SECURITY_ERROR, __forwardEvent);
       
       __connection.addEventListener(NativeMessageEvent.MESSAGE_RECEIVED, __handleMessage);
       
+      // Opens the native connection.
       __connection.open();
     }
     
+    /**
+     * Retrieves the bridge singleton instance.
+     * 
+     * @return The unique bridge instance.
+     */
     public static function get instance():NativeBridge
     {
       return __INSTANCE;
@@ -56,7 +61,7 @@ package com.google.code.actionscriptnativebridge
     
     public function addFunctionHandler(operation:String, handler:Function):void
     {
-      addEventListener(
+      __nativeRequestDispatcher.addEventListener(
         operation,
         function (e:NativeRequestEvent):void
         {
@@ -66,7 +71,7 @@ package com.google.code.actionscriptnativebridge
           }
           catch (error:Error)
           {
-            e.status = 1;
+            e.status = ResultStatus.FAILURE;
             e.resultData = error;
           }
           e.sendResponse();
@@ -74,32 +79,75 @@ package com.google.code.actionscriptnativebridge
       );
     }
     
-    public function addEventListener(type:String, listener:Function, useCapture:Boolean = false, priority:int = 0, useWeakReference:Boolean = false):void
+    public function addAsynchronousHandler(operation:String, handler:Function):void
+    {
+      __nativeRequestDispatcher.addEventListener(
+        operation,
+        function (e:NativeRequestEvent):void
+        {
+          try
+          {
+            e.arguments.push(e);
+            handler.apply(null, e.arguments);
+          }
+          catch (error:Error)
+          {
+            e.status = ResultStatus.FAILURE;
+            e.resultData = error;
+            e.sendResponse();
+          }
+        }
+      );
+    }
+    
+    /**
+     * @see IEventDispatcher::addEventListener. 
+     */
+    public function addEventListener(type:String, listener:Function, useCapture:Boolean = false, 
+      priority:int = 0, useWeakReference:Boolean = false):void
     {
       __dispatcher.addEventListener(type, listener, useCapture, priority, useWeakReference);
     }
     
+    /**
+     * @see IEventDispatcher::removeEventListener. 
+     */
     public function removeEventListener(type:String, listener:Function, useCapture:Boolean = false):void
     {
       __dispatcher.removeEventListener(type, listener, useCapture);
       
     }
     
+    /**
+     * @see IEventDispatcher::dispatchEvent. 
+     */
     public function dispatchEvent(event:Event):Boolean
     {
       return __dispatcher.dispatchEvent(event);
     }
     
+    /**
+     * @see IEventDispatcher::willTrigger. 
+     */
     public function willTrigger(type:String):Boolean
     {
       return __dispatcher.willTrigger(type);
     }
     
+    /**
+     * @see IEventDispatcher::hasEventListener. 
+     */
     public function hasEventListener(type:String):Boolean
     {
       return __dispatcher.hasEventListener(type);
     }
     
+    /**
+     * Makes a call to a native method.
+     * 
+     * @param name The method name.
+     * @param args The arguments to method.
+     */
     public function callNativeMethod(name:String, args:Array):void
     {
       __logger.debug("Call to native method started.");
@@ -108,11 +156,6 @@ package com.google.code.actionscriptnativebridge
       var arguments:Array = new Array();
       var resultCallback:ResultCallback = null;
       var faultCallback:FaultCallback = null;
-      
-/*      if (args.length == 1 && args[0] is Array)
-      {
-        args = args[0];
-      }*/
       
       if (args != null)
       {
@@ -153,87 +196,62 @@ package com.google.code.actionscriptnativebridge
       var responder:NativeResponder = new NativeResponder(resultCallback, faultCallback);
       __pushResponder(requestId, responder);
       
+      // Creates a message.
       var message:Object = new Object();
-      message.type = "REQUEST";
+      message.type = MessageType.REQUEST;
       message.requestId = requestId;
       message.operation = operation;
       message.arguments = arguments;
       
+      // Sends the message to native module.
       __connection.send(message);
     }
     
+    /**
+     * @see Proxy::callProperty.
+     */
     flash.utils.flash_proxy override function callProperty(name:*, ...rest):*
     {
-      /*__logger.debug("Call to native method started.");
-      
-      var operation:String = name;
-      var arguments:Array = new Array();
-      var resultCallback:ResultCallback = null;
-      var faultCallback:FaultCallback = null;
-      
-      if (rest != null)
-      {
-        for each (var argument:* in rest)
-        {
-          if (argument is ResultCallback)
-          {
-            __logger.debug("ResultCallback found.");
-            resultCallback = ResultCallback(argument);
-          }
-          else if(argument is FaultCallback)
-          {
-            __logger.debug("FaultCallback found.");
-            faultCallback = FaultCallback(argument);
-          }
-          else
-          {
-            arguments.push(argument);
-          }
-          
-        }
-
-      }
-      
-      if (Log.isInfo())
-      {
-        __logger.info(
-          "\nNative Operation:\n-----------------\nOperation: {0}, \nParameters: [{1}], \nResult Callback: {2}, \nFault Callback: {3}", 
-          operation, 
-          arguments, 
-          (resultCallback != null), 
-          (faultCallback != null)
-        );
-      }
-      
-      var requestId:int = __nextRequestId;
-      
-      var responder:NativeResponder = new NativeResponder(resultCallback, faultCallback);
-      __pushResponder(requestId, responder);
-      
-      var message:Object = new Object();
-      message.type = "REQUEST";
-      message.requestId = requestId;
-      message.operation = operation;
-      message.arguments = arguments;
-      
-      __connection.send(message);*/
       callNativeMethod(name, rest);
     }
     
+    /**
+     * The bridge instance.
+     */
     private static const __INSTANCE:NativeBridge = new NativeBridge();
     
+    /**
+     * The logger for this class.
+     */
     private static var __logger:ILogger = LoggingUtil.getClassLogger(NativeBridge);
     
+    /**
+     * The event dispatcher for this class.
+     */
     private var __dispatcher:EventDispatcher;
     
+    /**
+     * The event dispatcher for this class.
+     */
+    private var __nativeRequestDispatcher:EventDispatcher;
+    
+    /**
+     * The connection to native module.
+     */
     private var __connection:NativeConnection;
     
+    /**
+     * The responders for sent requests.
+     */
     private var __responders:Dictionary = new Dictionary();
     
+    /**
+     * The function handlers to respond to native requests.
+     */
     private var __functionHandlers:Dictionary = new Dictionary();
     
     /**
-     * Contador usado para gerar os request IDs sequecialmente.
+     * Request ID counter. Used to generate sequential IDs.
      */
     private static var __requestCounter:int = 1;
     
@@ -247,11 +265,11 @@ package com.google.code.actionscriptnativebridge
         __logger.info("New message received: {0}", ObjectUtil.toString(message));
       }
        
-      // Verifica se a resposta é relativa à alguma requisição ou se trata de uma notificação.
+      // Checks the message type.
       switch (message.type)
       {
-        // Se for uma resposta...
-        case "RESPONSE":
+        // If it was a response...
+        case MessageType.RESPONSE:
         {
           var responder:NativeResponder = __popResponder(requestId);
 
@@ -266,8 +284,8 @@ package com.google.code.actionscriptnativebridge
         }
         break;
         
-        // Se for uma notificação...
-        case "REQUEST":
+        // If it was a request message...
+        case MessageType.REQUEST:
         {
           //dispatchEvent(new NotificationEvent(receivedMessage.notificationId, receivedMessage.data));
           __processRequest(message);
@@ -286,10 +304,10 @@ package com.google.code.actionscriptnativebridge
     }
     
     /**
-     * Armazena um objeto NativeRequest contendo os dados de uma requisição.
+     * Stores a Responder object which will be used to handle the response to the given request ID.
      * 
-     * @param id Id da requisição.
-     * @request Objeto representando a requisição. 
+     * @param requestId The request ID.
+     * @param responder The responder. 
      */
     private function __pushResponder(requestId:int, responder:NativeResponder):void
     {
@@ -297,9 +315,11 @@ package com.google.code.actionscriptnativebridge
     }
     
     /**
-     * Recupera um request ateriormente armazenado.
+     * Retrieves the stored Responder object to the given request ID.
      * 
-     * @param id Id do request a ser recuperado.
+     * @param requestId The request ID.
+     * 
+     * @return The Responder.
      */
     private function __popResponder(requestId:int):NativeResponder
     {
@@ -334,7 +354,7 @@ package com.google.code.actionscriptnativebridge
         function (result:NativeRequestEvent):void
         {
           var responseMessage:Object = new Object();
-          responseMessage.type = "RESPONSE";
+          responseMessage.type = MessageType.RESPONSE;
           responseMessage.requestId = requestId;
           responseMessage.status = result.status;
           responseMessage.data = result.resultData;
@@ -343,7 +363,7 @@ package com.google.code.actionscriptnativebridge
         }
       );
       
-      dispatchEvent(event);
+      __nativeRequestDispatcher.dispatchEvent(event);
     }
 
   }

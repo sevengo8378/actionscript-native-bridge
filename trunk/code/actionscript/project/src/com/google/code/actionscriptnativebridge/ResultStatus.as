@@ -5,11 +5,7 @@ package com.google.code.actionscriptnativebridge
     
     public static const SUCCESS:int = 0;
     
-    public static const ERROR:int = 1;
-    
-    public static const EXECUTION_ERROR:int = 2;
-    
-    public static const NETWORK_ERROR:int = 3;
+    public static const FAILURE:int = 1;
 
   }
 }

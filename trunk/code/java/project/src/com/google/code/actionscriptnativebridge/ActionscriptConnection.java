@@ -1,5 +1,6 @@
 package com.google.code.actionscriptnativebridge;
 
+import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -12,7 +13,7 @@ import org.apache.commons.logging.LogFactory;
 import com.google.code.actionscriptnativebridge.message.Message;
 import com.google.code.actionscriptnativebridge.translator.JsonMessageTranslator;
 
-public class ActionscriptConnection implements Runnable
+public class ActionScriptConnection implements Runnable
 {
 
   public static interface MessageListener
@@ -20,13 +21,12 @@ public class ActionscriptConnection implements Runnable
     void messageReceived(Message message);
   }
 
-  public ActionscriptConnection(MessageListener listener)
+  public ActionScriptConnection(MessageListener listener)
   {
     this(listener, new JsonMessageTranslator());
   }
 
-  public ActionscriptConnection(MessageListener listener,
-      JsonMessageTranslator translator)
+  public ActionScriptConnection(MessageListener listener, JsonMessageTranslator translator)
   {
     __listener = listener;
     __translator = translator;
@@ -66,8 +66,7 @@ public class ActionscriptConnection implements Runnable
 
         if (__logger.isInfoEnabled())
         {
-          __logger.info("Client connected: "
-              + __client.getRemoteSocketAddress());
+          __logger.info("Client connected: " + __client.getRemoteSocketAddress());
         }
         __input = __client.getInputStream();
         __output = __client.getOutputStream();
@@ -82,12 +81,21 @@ public class ActionscriptConnection implements Runnable
           __logger.debug("Message received: " + messageString);
           Message message = __translator.messageFromString(messageString);
 
-          // Notifies the listener method.
-          __listener.messageReceived(message);
+          if (message != null)
+          {
+            // Notifies the listener method.
+            __listener.messageReceived(message);
+          }
         }
 
       }
 
+    }
+    catch (EOFException e)
+    {
+      __running = false;
+
+      __logger.error("Connection closed.");
     }
     catch (Exception e)
     {
@@ -96,7 +104,7 @@ public class ActionscriptConnection implements Runnable
     }
   }
 
-  private Log __logger = LogFactory.getLog(ActionscriptConnection.class);
+  private Log __logger = LogFactory.getLog(ActionScriptConnection.class);
 
   private MessageListener __listener;
 
@@ -121,13 +129,17 @@ public class ActionscriptConnection implements Runnable
     int codePoint;
     boolean zeroByteRead = false;
 
-    System.out.println("Reading...");
+    __logger.debug("Reading...");
+
     do
     {
       codePoint = stream.read();
-      // System.out.println(codePoint);
-      // TODO
-      if (codePoint <= 0)
+
+      if (codePoint == -1)
+      {
+        throw new EOFException();
+      }
+      if (codePoint == 0)
       {
         zeroByteRead = true;
       }

@@ -12,6 +12,8 @@
  
 package com.google.code.actionscriptnativebridge.event
 {
+  import com.google.code.actionscriptnativebridge.ResultStatus;
+  
   import flash.events.Event;
 
   /**
@@ -119,7 +121,7 @@ package com.google.code.actionscriptnativebridge.event
     
     private var __resultHandler:Function;
     
-    private var __status:int = 0;
+    private var __status:int = ResultStatus.SUCCESS;
     
     private var __resultData:Object;
     

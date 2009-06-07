@@ -12,8 +12,8 @@ import org.apache.commons.logging.LogFactory;
 import org.scannotation.AnnotationDB;
 import org.scannotation.ClasspathUrlFinder;
 
-import com.google.code.actionscriptnativebridge.annotation.NativeMethod;
-import com.google.code.actionscriptnativebridge.annotation.NativeService;
+import com.google.code.actionscriptnativebridge.annotation.ActionScriptMethod;
+import com.google.code.actionscriptnativebridge.annotation.ActionScriptService;
 
 public class MethodsMapper
 {
@@ -27,7 +27,7 @@ public class MethodsMapper
 
     db.scanArchives(urls);
 
-    Set<String> annotatedClasses = db.getAnnotationIndex().get(NativeService.class.getName());
+    Set<String> annotatedClasses = db.getAnnotationIndex().get(ActionScriptService.class.getName());
 
     if (annotatedClasses != null && annotatedClasses.size() > 0)
     {
@@ -39,11 +39,11 @@ public class MethodsMapper
         __logger.debug("Class methods:");
         for (Method method : clazz.getMethods())
         {
-          NativeMethod nativeMethod = method.getAnnotation(NativeMethod.class);
-          if (nativeMethod != null)
+          ActionScriptMethod actionScriptMethod = method.getAnnotation(ActionScriptMethod.class);
+          if (actionScriptMethod != null)
           {
-            __logger.debug(method.getName() + "(" + nativeMethod.name() + ")");
-            String key = (!nativeMethod.name().equals("")) ? nativeMethod.name() : method.getName();
+            __logger.debug(method.getName() + "(" + actionScriptMethod.name() + ")");
+            String key = (!actionScriptMethod.name().equals("")) ? actionScriptMethod.name() : method.getName();
             __methodsMap.put(key, method);
 
           }
