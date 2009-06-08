@@ -79,7 +79,7 @@
         );
         
         // Test without any callback;
-        NativeBridge.instance.process(3, "My String");
+        NativeBridge.instance.process(3, "My String - áéíóúç");
       }
       
       private function __testNativeCallThroughProxyObject():void
