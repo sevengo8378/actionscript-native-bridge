@@ -13,14 +13,14 @@ public class MyOtherClass
     return a + b;
   }
 
-  @ActionScriptMethod(name = "multiplica")
+  @ActionScriptMethod(name = "multiply")
   public int mult(int a, int b)
   {
     return a * b;
   }
 
   @ActionScriptMethod
-  public void processa(Integer i, String name)
+  public void process(Integer i, String name)
   {
     System.out.println(name + " - " + i);
   }
