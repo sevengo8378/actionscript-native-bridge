@@ -28,7 +28,7 @@ package com.google.code.actionscriptnativebridge
     public function NativeConnection(
       host:String = "127.0.0.1", 
       port:int = 2302, 
-      charset:String = "utf-8",
+      charset:String = "iso-8850-1",//"utf-8",
       translator:IMessageTranslator = null)
     {
       if (translator == null)
