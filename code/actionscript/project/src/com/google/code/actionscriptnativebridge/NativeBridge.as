@@ -59,7 +59,7 @@ package com.google.code.actionscriptnativebridge
       return __INSTANCE;
     } 
     
-    public function addFunctionHandler(operation:String, handler:Function):void
+    public function addHandler(operation:String, handler:Function):void
     {
       __nativeRequestDispatcher.addEventListener(
         operation,

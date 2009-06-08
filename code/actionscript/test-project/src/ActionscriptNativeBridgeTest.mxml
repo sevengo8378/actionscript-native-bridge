@@ -29,63 +29,88 @@
         traceTarget.level = LogEventLevel.ALL;
         Log.addTarget(traceTarget);
         
-        new MyOtherClass().processa(1, "pcmnac++");
+        __testNativeCallThroughBridgeFacade();
+        __testNativeCallThroughProxyObject();
+        __testSynchronousHandler();
+        __testAsynchronousHandler();
+      }
+      
+      private function __testNativeCallThroughBridgeFacade():void
+      {
+        // Test with Result and Fault callbacks;
+        NativeBridge.instance.sum(
+          3, 2, 
+          new ResultCallback(
+            function(e:ResultEvent):void
+            {
+              trace("sum(3, 2) => " + e.data);
+            }
+          ), 
+          new FaultCallback(
+            function(e:FaultEvent):void
+            {
+              trace(e.status);
+              trace(ObjectUtil.toString(e.data));
+            }
+          )
+        );
         
-        NativeBridge.instance.addFunctionHandler(
-          "soma",
+        // Test with Result callback;
+        NativeBridge.instance.multiply( // using alias to method name
+          3, 2, 
+          new ResultCallback(
+            function(e:ResultEvent):void
+            {
+              trace("multiply(3, 2) => " + e.data);
+            }
+          )
+        );
+        
+        // Test with Fault callback;
+        NativeBridge.instance.sum(
+          3, 2, 
+          new FaultCallback(
+            function(e:FaultEvent):void
+            {
+              trace(e.status);
+              trace(ObjectUtil.toString(e.data));
+            }
+          )
+        );
+        
+        // Test without any callback;
+        NativeBridge.instance.process(3, "My String");
+      }
+      
+      private function __testNativeCallThroughProxyObject():void
+      {
+        // Test with Result and Fault callbacks;
+        new MyOtherClass().process(1, "pcmnac++");
+      }
+      
+      private function __testSynchronousHandler():void
+      {
+        NativeBridge.instance.addHandler(
+          "sum",
           function(a:int, b:int):int
           {
             return a + b;
           }
         );
-        
+      }
+      
+      private function __testAsynchronousHandler():void
+      {
         NativeBridge.instance.addAsynchronousHandler(
-          "multiplica",
+          "mult",
           function(a:int, b:int, e:NativeRequestEvent):void
           {
-            e.resultData = a * b + 1;
+            e.resultData = a * b;
             e.sendResponse();
           }
         );
-        
-        
-        NativeBridge.instance.processa(1, "pcmnac");
-        
-        NativeBridge.instance.multiplica(
-          3, 2, 
-          new ResultCallback(
-            function(a:int):void
-            {
-              trace("Resultado: " + a);
-            }
-          ), 
-          new FaultCallback(
-            function(fe:FaultEvent):void
-            {
-              trace(fe.status);
-              trace(ObjectUtil.toString(fe.data));
-            }
-          )
-        );
-      
-      
-      NativeBridge.instance.sum(
-          3, 2, 
-          new ResultCallback(
-            function(re:ResultEvent):void
-            {
-              trace(re.data);
-            }
-          ), 
-          new FaultCallback(
-            function(fe:FaultEvent):void
-            {
-              trace(fe.status);
-              trace(ObjectUtil.toString(fe.data));
-            }
-          )
-        );
       }
+      
       
     ]]>
   </mx:Script>

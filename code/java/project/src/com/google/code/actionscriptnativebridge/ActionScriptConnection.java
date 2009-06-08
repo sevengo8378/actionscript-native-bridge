@@ -6,6 +6,8 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -26,9 +28,10 @@ public class ActionScriptConnection implements Runnable
     this(listener, new JsonMessageTranslator());
   }
 
-  public ActionScriptConnection(MessageListener listener, JsonMessageTranslator translator)
+  public ActionScriptConnection(MessageListener listener,
+      JsonMessageTranslator translator)
   {
-    __listener = listener;
+    __messageListener = listener;
     __translator = translator;
   }
 
@@ -36,6 +39,20 @@ public class ActionScriptConnection implements Runnable
   {
     __logger.info("Opening connection at port " + __port + " ...");
     __server = new ServerSocket(__port);
+
+    // TODO: implement a generic method for this purpose
+    // Notify listeners
+    for (ActionScriptBridgeListener listener : __bridgeListeners)
+    {
+      try
+      {
+        listener.bridgeOpened();
+      }
+      catch (Exception e)
+      {
+        __logger.error("Error calling listener", e);
+      }
+    }
 
     __logger.debug("Starting server thread...");
     new Thread(this).start();
@@ -66,8 +83,24 @@ public class ActionScriptConnection implements Runnable
 
         if (__logger.isInfoEnabled())
         {
-          __logger.info("Client connected: " + __client.getRemoteSocketAddress());
+          __logger.info("Client connected: "
+              + __client.getRemoteSocketAddress());
         }
+
+        // TODO: implement a generic method for this purpose
+        // Notify listeners
+        for (ActionScriptBridgeListener listener : __bridgeListeners)
+        {
+          try
+          {
+            listener.clientConnected();
+          }
+          catch (Exception e)
+          {
+            __logger.error("Error calling listener", e);
+          }
+        }
+
         __input = __client.getInputStream();
         __output = __client.getOutputStream();
 
@@ -84,7 +117,7 @@ public class ActionScriptConnection implements Runnable
           if (message != null)
           {
             // Notifies the listener method.
-            __listener.messageReceived(message);
+            __messageListener.messageReceived(message);
           }
         }
 
@@ -93,20 +126,76 @@ public class ActionScriptConnection implements Runnable
     }
     catch (EOFException e)
     {
+
+      __logger.info("Connection closed.");
+
+      // TODO: implement a generic method for this purpose
+      // Notify listeners
+      for (ActionScriptBridgeListener listener : __bridgeListeners)
+      {
+        try
+        {
+          listener.clientDisconnected();
+        }
+        catch (Exception e1)
+        {
+          __logger.error("Error calling listener", e1);
+        }
+      }
+
       __running = false;
 
-      __logger.error("Connection closed.");
+      // TODO: implement a generic method for this purpose
+      // Notify listeners
+      for (ActionScriptBridgeListener listener : __bridgeListeners)
+      {
+        try
+        {
+          listener.bridgeClosed();
+        }
+        catch (Exception e1)
+        {
+          __logger.error("Error calling listener", e1);
+        }
+      }
+
     }
     catch (Exception e)
     {
       // TODO: handle exception
-      e.printStackTrace();
+      __logger.error("Connection error", e);
+
+      // TODO: implement a generic method for this purpose
+      // Notify listeners
+      for (ActionScriptBridgeListener listener : __bridgeListeners)
+      {
+        try
+        {
+          listener.bridgeError(e);
+        }
+        catch (Exception e1)
+        {
+          __logger.error("Error calling listener", e1);
+        }
+      }
     }
   }
 
+  public void addListener(ActionScriptBridgeListener listener)
+  {
+    __bridgeListeners.add(listener);
+  }
+
+  public void removeListener(ActionScriptBridgeListener listener)
+  {
+    __bridgeListeners.remove(listener);
+  }
+
+  private List<ActionScriptBridgeListener> __bridgeListeners = new ArrayList<ActionScriptBridgeListener>();
+
   private Log __logger = LogFactory.getLog(ActionScriptConnection.class);
 
-  private MessageListener __listener;
+  private MessageListener __messageListener;
 
   private JsonMessageTranslator __translator;
 

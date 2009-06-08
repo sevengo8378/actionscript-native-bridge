@@ -36,7 +36,8 @@ public class ActionScriptBridge implements MessageListener
 
   }
 
-  public Object callActionscriptMethod(String name, Object... arguments) throws IOException
+  public Object callActionscriptMethod(String name, Object... arguments)
+      throws IOException
   {
 
     Object result = null;
@@ -52,6 +53,7 @@ public class ActionScriptBridge implements MessageListener
     {
       try
       {
+        // TODO: make this value configurable.
         Thread.sleep(100);
       }
       catch (InterruptedException e)
@@ -71,11 +73,22 @@ public class ActionScriptBridge implements MessageListener
       }
       else
       {
-        throw new RuntimeException("Actionscript Error: " + responseMessage.getData());
+        throw new RuntimeException("Actionscript Error: "
+            + responseMessage.getData());
       }
     }
 
     return result;
+  }
+
+  public void addListener(ActionScriptBridgeListener listener)
+  {
+    __connection.addListener(listener);
+  }
+
+  public void removeListener(ActionScriptBridgeListener listener)
+  {
+    __connection.removeListener(listener);
   }
 
   // @Override
@@ -127,44 +140,24 @@ public class ActionScriptBridge implements MessageListener
 
     try
     {
-      Object result = __executeOperation(requestMessage.getOperation(), requestMessage.getArguments());
-      responseMessage = new ResponseMessage(requestMessage.getRequestId(), StatusCodes.SUCCESS, result);
+      Object result = __executeOperation(requestMessage.getOperation(),
+          requestMessage.getArguments());
+      responseMessage = new ResponseMessage(requestMessage.getRequestId(),
+          StatusCodes.SUCCESS, result);
     }
     catch (Exception e)
     {
-      responseMessage = new ResponseMessage(requestMessage.getRequestId(), StatusCodes.FAILURE, e);
+      responseMessage = new ResponseMessage(requestMessage.getRequestId(),
+          StatusCodes.FAILURE, e);
     }
 
     try
     {
       __connection.sendMessage(responseMessage);
-
-      // TODO: Remove this test code
-      new Thread(new Runnable()
-      {
-
-        public void run()
-        {
-          try
-          {
-            System.out.println(callActionscriptMethod("soma", 1, 3));
-            System.out.println(callActionscriptMethod("multiplica", 2, 3));
-            System.out.println("voltou......");
-          }
-          catch (IOException e)
-          {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-          }
-
-        }
-
-      }).start();
-
     }
     catch (IOException e)
     {
-      e.printStackTrace();
+      __logger.error("Error sending message", e);
     }
 
   }
@@ -174,11 +167,11 @@ public class ActionScriptBridge implements MessageListener
     __pendingRequestMap.put(message.getRequestId(), message);
   }
 
-  public Object __executeOperation(String operation, Object[] parameters) throws MethodNotFoundException,
-      ExecutionException
+  public Object __executeOperation(String operation, Object[] parameters)
+      throws MethodNotFoundException, ExecutionException
   {
-    __logger.debug("Executing the operation \"" + operation + "\" with the parameters "
-        + ArrayUtils.toString(parameters));
+    __logger.debug("Executing the operation \"" + operation
+        + "\" with the parameters " + ArrayUtils.toString(parameters));
 
     Object result = null;
 
