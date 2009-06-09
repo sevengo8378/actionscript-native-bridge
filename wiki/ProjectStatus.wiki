@@ -4,8 +4,8 @@
 
 == Implemented ==
   * Java
-  ** Map annotated methods;
-  ** Socket communication;
+    * Map annotated methods;
+    * Socket communication;
 
 = Details =
 
