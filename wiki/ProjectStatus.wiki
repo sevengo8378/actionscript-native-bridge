@@ -1,9 +1,11 @@
 #summary One-sentence summary of this page.
 
-= Tasks Implemented =
+= Tasks =
 
-Add your content here.
-
+== Implemented ==
+  * Java
+  ** Map annotated methods;
+  ** Socket communication;
 
 = Details =
 
