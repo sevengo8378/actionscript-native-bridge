@@ -1,5 +1,6 @@
 package com.google.code.actionscriptnativebridge;
 
+import java.io.ByteArrayOutputStream;
 import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
@@ -28,8 +29,7 @@ public class ActionScriptConnection implements Runnable
     this(listener, new JsonMessageTranslator());
   }
 
-  public ActionScriptConnection(MessageListener listener,
-      JsonMessageTranslator translator)
+  public ActionScriptConnection(MessageListener listener, JsonMessageTranslator translator)
   {
     __messageListener = listener;
     __translator = translator;
@@ -37,8 +37,8 @@ public class ActionScriptConnection implements Runnable
 
   public void open() throws IOException
   {
-    __logger.info("Opening connection at port " + __port + " ...");
-    __server = new ServerSocket(__port);
+    __logger.info("Opening connection at port " + Configuration.port + " ...");
+    __server = new ServerSocket(Configuration.port);
 
     // TODO: implement a generic method for this purpose
     // Notify listeners
@@ -65,7 +65,7 @@ public class ActionScriptConnection implements Runnable
 
     __logger.debug("Message sent: " + messageString);
 
-    __output.write(messageString.getBytes());
+    __output.write(messageString.getBytes(Configuration.charset));
 
     __output.flush();
   }
@@ -83,8 +83,7 @@ public class ActionScriptConnection implements Runnable
 
         if (__logger.isInfoEnabled())
         {
-          __logger.info("Client connected: "
-              + __client.getRemoteSocketAddress());
+          __logger.info("Client connected: " + __client.getRemoteSocketAddress());
         }
 
         // TODO: implement a generic method for this purpose
@@ -199,8 +198,6 @@ public class ActionScriptConnection implements Runnable
 
   private JsonMessageTranslator __translator;
 
-  private int __port = GlobalConstraints.DEFAULT_PORT;
-
   private ServerSocket __server;
 
   private Socket __client;
@@ -214,7 +211,7 @@ public class ActionScriptConnection implements Runnable
   private String __readMessage(InputStream stream) throws IOException
   {
 
-    StringBuffer buffer = new StringBuffer();
+    ByteArrayOutputStream buffer = new ByteArrayOutputStream();
     int codePoint;
     boolean zeroByteRead = false;
 
@@ -234,14 +231,12 @@ public class ActionScriptConnection implements Runnable
       }
       else
       {
-        buffer.appendCodePoint(codePoint);
+        buffer.write(codePoint);
       }
     }
     while (!zeroByteRead);
 
-    String result = buffer.toString();
-
-    return result;
+    return new String(buffer.toByteArray(), Configuration.charset);
   }
 
 }

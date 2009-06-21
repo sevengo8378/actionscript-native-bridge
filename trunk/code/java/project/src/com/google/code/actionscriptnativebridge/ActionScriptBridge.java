@@ -6,12 +6,15 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.google.code.actionscriptnativebridge.ActionScriptConnection.MessageListener;
+import com.google.code.actionscriptnativebridge.annotation.ActionScriptMethod;
+import com.google.code.actionscriptnativebridge.annotation.StatefulObject;
 import com.google.code.actionscriptnativebridge.exception.ExecutionException;
 import com.google.code.actionscriptnativebridge.exception.MethodNotFoundException;
 import com.google.code.actionscriptnativebridge.message.Message;
@@ -36,8 +39,7 @@ public class ActionScriptBridge implements MessageListener
 
   }
 
-  public Object callActionscriptMethod(String name, Object... arguments)
-      throws IOException
+  public Object callActionscriptMethod(String name, Object... arguments) throws IOException
   {
 
     Object result = null;
@@ -73,8 +75,7 @@ public class ActionScriptBridge implements MessageListener
       }
       else
       {
-        throw new RuntimeException("Actionscript Error: "
-            + responseMessage.getData());
+        throw new RuntimeException("Actionscript Error: " + responseMessage.getData());
       }
     }
 
@@ -122,6 +123,8 @@ public class ActionScriptBridge implements MessageListener
 
   private ActionScriptConnection __connection = new ActionScriptConnection(this);
 
+  private Map<String, Object> __asObjects = new HashMap<String, Object>();
+
   private ActionScriptBridge()
   {
 
@@ -140,15 +143,12 @@ public class ActionScriptBridge implements MessageListener
 
     try
     {
-      Object result = __executeOperation(requestMessage.getOperation(),
-          requestMessage.getArguments());
-      responseMessage = new ResponseMessage(requestMessage.getRequestId(),
-          StatusCodes.SUCCESS, result);
+      Object result = __executeOperation(requestMessage.getOperation(), requestMessage.getArguments());
+      responseMessage = new ResponseMessage(requestMessage.getRequestId(), StatusCodes.SUCCESS, result);
     }
     catch (Exception e)
     {
-      responseMessage = new ResponseMessage(requestMessage.getRequestId(),
-          StatusCodes.FAILURE, e);
+      responseMessage = new ResponseMessage(requestMessage.getRequestId(), StatusCodes.FAILURE, e);
     }
 
     try
@@ -167,15 +167,17 @@ public class ActionScriptBridge implements MessageListener
     __pendingRequestMap.put(message.getRequestId(), message);
   }
 
-  public Object __executeOperation(String operation, Object[] parameters)
-      throws MethodNotFoundException, ExecutionException
+  public Object __executeOperation(String operation, Object[] parameters) throws MethodNotFoundException,
+      ExecutionException
   {
-    __logger.debug("Executing the operation \"" + operation
-        + "\" with the parameters " + ArrayUtils.toString(parameters));
+    __logger.debug("Executing the operation \"" + operation + "\" with the parameters "
+        + ArrayUtils.toString(parameters));
 
     Object result = null;
 
     Class<?> declaringClass = null;
+    Object declaringObject = null;
+    boolean saveObject = false;
 
     // Gets a existing method.
     Method method = null;
@@ -189,7 +191,18 @@ public class ActionScriptBridge implements MessageListener
 
       try
       {
-        declaringClass = Class.forName(className);
+        if (__asObjects.containsKey(className))
+        {
+          declaringObject = __asObjects.get(className);
+          declaringClass = declaringObject.getClass();
+        }
+        else
+        {
+          declaringClass = Class.forName(className);
+
+          StatefulObject annotation = declaringClass.getAnnotation(StatefulObject.class);
+          saveObject = (annotation != null);
+        }
 
         // Gets argument types.
         List<Class<?>> types = new ArrayList<Class<?>>();
@@ -221,13 +234,23 @@ public class ActionScriptBridge implements MessageListener
       {
         __logger.debug("invoking " + method.getName());
 
-        Object declaringObject = declaringClass.newInstance();
+        if (declaringObject == null)
+        {
+          declaringObject = declaringClass.newInstance();
+          
+          if (saveObject)
+          {
+            String id = UUID.randomUUID().toString();
+            __asObjects.put(id, declaringObject);
+          }
+        }
 
         method.setAccessible(true);
         result = method.invoke(declaringObject, parameters);
       }
       catch (Exception e)
       {
+        __logger.error("Error invoking " + method.getName(), e);
         throw new ExecutionException(e);
       }
     }

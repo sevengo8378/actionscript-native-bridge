@@ -20,7 +20,7 @@ package com.google.code.actionscriptnativebridge
   [Event(name="close", type="flash.events.Event")]
   [Event(name="ioError", type="flash.events.IOErrorEvent")]
   [Event(name="securityError", type="flash.events.SecurityErrorEvent")]
-  [Event(name="messageReceived", type="com.pcmnac.actionscriptnativebridge.event.NativeMessageEvent")]
+  [Event(name="messageReceived", type="com.google.code.actionscriptnativebridge.event.NativeMessageEvent")]
   
   
   public class NativeConnection extends EventDispatcher
@@ -28,7 +28,7 @@ package com.google.code.actionscriptnativebridge
     public function NativeConnection(
       host:String = "127.0.0.1", 
       port:int = 2302, 
-      charset:String = "iso-8850-1",//"utf-8",
+      charset:String = /*"iso-8850-1",*/"utf-8",
       translator:IMessageTranslator = null)
     {
       if (translator == null)
@@ -183,7 +183,9 @@ package com.google.code.actionscriptnativebridge
           __logger.info("Message received [{0}]: {1}", messageString.length, messageString);
           
           var receivedMessage:Object = __translator.messageFromString(messageString);
-          var event:NativeMessageEvent = new NativeMessageEvent(NativeMessageEvent.MESSAGE_RECEIVED, receivedMessage);
+          var event:NativeMessageEvent = new NativeMessageEvent(
+            NativeMessageEvent.MESSAGE_RECEIVED, 
+            receivedMessage);
           
           dispatchEvent(event);
         }
