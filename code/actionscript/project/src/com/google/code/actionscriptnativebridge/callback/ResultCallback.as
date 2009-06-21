@@ -14,7 +14,8 @@ package com.google.code.actionscriptnativebridge.callback
     {
       var event:ResultEvent = new ResultEvent(requestId, data);
       
-      callback.call(null, event);
+      //callback.call(null, event);
+      callback.call(null, data);
     }
     
   }

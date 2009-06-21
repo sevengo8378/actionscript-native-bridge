@@ -11,10 +11,14 @@ package com.google.code.actionscriptnativebridge
   
   public class NativeResponder
   {
-    public function NativeResponder(resultCallback:ResultCallback, faultCallback:FaultCallback)
+    public function NativeResponder(
+      resultCallback:ResultCallback, 
+      faultCallback:FaultCallback,
+      nativeObject:NativeObject)
     {
       __resultCallback = resultCallback;
       __faultCallback = faultCallback;
+      __nativeObject = nativeObject;
     }
     
     public function processResponse(message:Object):void
@@ -33,6 +37,11 @@ package com.google.code.actionscriptnativebridge
           ObjectUtil.toString(data)
         );
       }
+      
+      if (__nativeObject != null)
+      {
+        __nativeObject.nativeId = message.nativeId;
+      }
 
       if (callback != null)
       {
@@ -47,6 +56,8 @@ package com.google.code.actionscriptnativebridge
     private var __resultCallback:ResultCallback;
     
     private var __faultCallback:FaultCallback;
+    
+    private var __nativeObject:NativeObject;
 
   }
 }

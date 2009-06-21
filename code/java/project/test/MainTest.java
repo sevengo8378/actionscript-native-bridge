@@ -1,14 +1,18 @@
 import java.io.IOException;
 
+import javax.swing.JOptionPane;
+
 import com.google.code.actionscriptnativebridge.ActionScriptBridge;
 import com.google.code.actionscriptnativebridge.ActionScriptBridgeListener;
+import com.google.code.actionscriptnativebridge.annotation.ActionScriptMethod;
 import com.google.code.actionscriptnativebridge.annotation.ActionScriptService;
+import com.test.ChatWindow;
 
+@ActionScriptService
 public class MainTest
 {
 
-  public static void main(String[] args) throws IOException,
-      ClassNotFoundException
+  public static void main(String[] args) throws IOException, ClassNotFoundException
   {
 
     try
@@ -41,7 +45,7 @@ public class MainTest
         public void clientConnected()
         {
           System.out.println("Client Connected");
-          
+
           new Thread(new Runnable()
           {
 
@@ -71,6 +75,9 @@ public class MainTest
       });
 
       bridge.start();
+
+      ChatWindow chatWindow = ChatWindow.getInstance();
+      chatWindow.setVisible(true);
 
       // JsonMessageTranslator translator = new JsonMessageTranslator();
       //
@@ -104,10 +111,22 @@ public class MainTest
 
   }
 
+  @ActionScriptMethod
+  public void showMessage(String message)
+  {
+    ChatWindow.getInstance().showMessage(message);
+  }
+
 }
 
 @ActionScriptService
 class MyClass
 {
+
+  @ActionScriptMethod
+  public void alert(String text)
+  {
+    JOptionPane.showMessageDialog(null, text);
+  }
 
 }

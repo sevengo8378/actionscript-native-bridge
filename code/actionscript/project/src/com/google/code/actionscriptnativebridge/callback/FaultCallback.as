@@ -13,7 +13,7 @@ package com.google.code.actionscriptnativebridge.callback
     {
       var event:FaultEvent = new FaultEvent(requestId, status, data);
       
-      callback.call(null, event);
+      callback.call(null, data);
     }
     
   }

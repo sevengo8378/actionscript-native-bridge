@@ -30,8 +30,20 @@ public class ResponseMessage extends Message
     this.__data = data;
   }
 
+  public String getNativeId()
+  {
+    return __nativeId;
+  }
+
+  public void setNativeId(String nativeId)
+  {
+    __nativeId = nativeId;
+  }
+
   private int __statusCode;
 
   private Object __data;
+
+  private String __nativeId;
 
 }

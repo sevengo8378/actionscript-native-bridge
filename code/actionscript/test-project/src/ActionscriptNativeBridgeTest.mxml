@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<mx:WindowedApplication xmlns:mx="http://www.adobe.com/2006/mxml" layout="absolute" creationComplete="init();">
+<mx:WindowedApplication xmlns:mx="http://www.adobe.com/2006/mxml" layout="vertical" creationComplete="init();">
   <mx:Script>
     <![CDATA[
       import com.test.MyOtherClass;
@@ -33,6 +33,16 @@
         __testNativeCallThroughProxyObject();
         __testSynchronousHandler();
         __testAsynchronousHandler();
+        
+        
+        NativeBridge.instance.addHandler(
+          "newMessage",
+          function(message:String):void
+          {
+            txa.text = ">>> " + message + "\n" + txa.text;
+          }
+        );
+        
       }
       
       private function __testNativeCallThroughBridgeFacade():void
@@ -41,16 +51,15 @@
         NativeBridge.instance.sum(
           3, 2, 
           new ResultCallback(
-            function(e:ResultEvent):void
+            function(result:int):void
             {
-              trace("sum(3, 2) => " + e.data);
+              trace("sum(3, 2) => " + result);
             }
           ), 
           new FaultCallback(
-            function(e:FaultEvent):void
+            function(error:Object):void
             {
-              trace(e.status);
-              trace(ObjectUtil.toString(e.data));
+              trace(ObjectUtil.toString(error));
             }
           )
         );
@@ -59,9 +68,9 @@
         NativeBridge.instance.multiply( // using alias to method name
           3, 2, 
           new ResultCallback(
-            function(e:ResultEvent):void
+            function(result:int):void
             {
-              trace("multiply(3, 2) => " + e.data);
+              trace("multiply(3, 2) => " + result);
             }
           )
         );
@@ -70,10 +79,9 @@
         NativeBridge.instance.sum(
           3, 2, 
           new FaultCallback(
-            function(e:FaultEvent):void
+            function(error:Object):void
             {
-              trace(e.status);
-              trace(ObjectUtil.toString(e.data));
+              trace(ObjectUtil.toString(error));
             }
           )
         );
@@ -114,4 +122,9 @@
       
     ]]>
   </mx:Script>
+  
+  <mx:TextArea id="txa" width="100%" height="100%" />
+  <mx:TextInput id="txt" />
+  <mx:Button label="Send" click="NativeBridge.instance.showMessage(txt.text); txa.text='&lt;&lt;&lt; ' + txt.text + '\n' + txa.text; txt.text='';" />
+  
 </mx:WindowedApplication>
