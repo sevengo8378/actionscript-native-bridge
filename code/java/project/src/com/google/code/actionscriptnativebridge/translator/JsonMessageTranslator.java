@@ -23,24 +23,25 @@ public class JsonMessageTranslator implements IMessageTranslator
       JSONObject object = JSONObject.fromObject(message);
 
       int requestId = object.getInt("requestId");
+      String objectId = object.optString("objectId");
 
       if (object.getString("type").equals(Message.Type.REQUEST.name()))
       {
         String operation = object.getString("operation");
         Object[] arguments = object.getJSONArray("arguments").toArray();
-        result = new RequestMessage(requestId, operation, arguments);
+
+        result = new RequestMessage(requestId, objectId, operation, arguments);
       }
       else if (object.getString("type").equals(Message.Type.RESPONSE.name()))
       {
-        // TODO
         int status = object.getInt("status");
         Object data = object.get("data");
 
-        result = new ResponseMessage(requestId, status, data);
+        result = new ResponseMessage(requestId, objectId, status, data);
       }
       else
       {
-
+        __logger.warn("Unknown message type: " + object.getString("type"));
       }
     }
     catch (Exception e)

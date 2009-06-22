@@ -23,9 +23,10 @@ public class RequestMessage extends Message
     __arguments = arguments;
   }
 
-  public RequestMessage(int requestId, String operation, Object[] arguments)
+  public RequestMessage(int requestId, String objectId, String operation, Object[] arguments)
   {
     super(Type.REQUEST, requestId);
+    setObjectId(objectId);
     setOperation(operation);
     setArguments(arguments);
   }

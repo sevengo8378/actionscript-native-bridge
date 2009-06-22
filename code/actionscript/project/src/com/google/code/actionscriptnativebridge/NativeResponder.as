@@ -40,7 +40,7 @@ package com.google.code.actionscriptnativebridge
       
       if (__nativeObject != null)
       {
-        __nativeObject.nativeId = message.nativeId;
+        __nativeObject.objectId = message.objectId;
       }
 
       if (callback != null)

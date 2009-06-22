@@ -56,7 +56,7 @@ public class ChatWindow extends JFrame
       {
         try
         {
-          ActionScriptBridge.getInstance().callActionscriptMethod("newMessage", textField.getText());
+          ActionScriptBridge.getInstance().callActionscriptMethod(null, "newMessage", textField.getText());
           textArea.setText("<<< " + textField.getText() + "\n" + textArea.getText());
           textField.setText("");
         }

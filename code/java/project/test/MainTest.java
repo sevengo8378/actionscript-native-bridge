@@ -1,7 +1,5 @@
 import java.io.IOException;
 
-import javax.swing.JOptionPane;
-
 import com.google.code.actionscriptnativebridge.ActionScriptBridge;
 import com.google.code.actionscriptnativebridge.ActionScriptBridgeListener;
 import com.google.code.actionscriptnativebridge.annotation.ActionScriptMethod;
@@ -12,7 +10,8 @@ import com.test.ChatWindow;
 public class MainTest
 {
 
-  public static void main(String[] args) throws IOException, ClassNotFoundException
+  public static void main(String[] args) throws IOException,
+      ClassNotFoundException
   {
 
     try
@@ -53,8 +52,10 @@ public class MainTest
             {
               try
               {
-                System.out.println(bridge.callActionscriptMethod("sum", 1, 3));
-                System.out.println(bridge.callActionscriptMethod("mult", 2, 3));
+                System.out.println(bridge.callActionscriptMethod(null, "sum",
+                    1, 3));
+                System.out.println(bridge.callActionscriptMethod(null, "mult",
+                    2, 3));
                 System.out.println("Ok....");
               }
               catch (IOException e)
@@ -115,18 +116,6 @@ public class MainTest
   public void showMessage(String message)
   {
     ChatWindow.getInstance().showMessage(message);
-  }
-
-}
-
-@ActionScriptService
-class MyClass
-{
-
-  @ActionScriptMethod
-  public void alert(String text)
-  {
-    JOptionPane.showMessageDialog(null, text);
   }
 
 }

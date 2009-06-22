@@ -2,6 +2,7 @@
 <mx:WindowedApplication xmlns:mx="http://www.adobe.com/2006/mxml" layout="vertical" creationComplete="init();">
   <mx:Script>
     <![CDATA[
+        import com.test.Alert;
       import com.test.MyOtherClass;
       import mx.containers.Tile;
       import com.google.code.actionscriptnativebridge.event.ResultEvent;
@@ -17,6 +18,8 @@
       import mx.logging.ILoggingTarget;
       import mx.logging.Log;
       import mx.utils.ObjectUtil;
+      
+      private var __alert:Alert = new Alert();
 
       private function init():void
       {
@@ -120,11 +123,23 @@
       }
       
       
+      private function __clickHandler():void
+      {
+          NativeBridge.instance.showMessage(txt.text); 
+          txa.text = "<<< " + txt.text + "\n" + txa.text;
+          
+          __alert.show(txt.text);
+           
+          txt.text = "";
+          
+          
+      }
+      
     ]]>
   </mx:Script>
   
   <mx:TextArea id="txa" width="100%" height="100%" />
   <mx:TextInput id="txt" />
-  <mx:Button label="Send" click="NativeBridge.instance.showMessage(txt.text); txa.text='&lt;&lt;&lt; ' + txt.text + '\n' + txa.text; txt.text='';" />
+  <mx:Button label="Send" click="__clickHandler()" />
   
 </mx:WindowedApplication>

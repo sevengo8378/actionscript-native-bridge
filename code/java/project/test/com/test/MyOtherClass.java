@@ -8,13 +8,13 @@ public class MyOtherClass
 {
 
   @ActionScriptMethod
-  public int sum(int a, int b)
+  public int sum(Integer a, Integer b)
   {
     return a + b;
   }
 
   @ActionScriptMethod(name = "multiply")
-  public int mult(int a, int b)
+  public int mult(Integer a, Integer b)
   {
     return a * b;
   }
