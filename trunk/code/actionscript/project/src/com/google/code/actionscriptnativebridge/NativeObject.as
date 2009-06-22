@@ -18,28 +18,32 @@ package com.google.code.actionscriptnativebridge
     {
       __logger.debug("Call to native method started.");
       
-      var objectId:String = __nativeId != null ? 
-        __nativeId : 
+      var objectId:String = __objectId != null ? 
+        __objectId : 
         getQualifiedClassName(this).replace("::", ".");
-      var methodName:String = objectId + "#" + name;
       
-      __logger.debug("Calling {0}", methodName);
+      __logger.debug("Calling {0}", objectId + "::" + name);
       
-      if (__nativeId == null)
+      if (__objectId == null)
       {
         rest.push(this);
       }
       
-      return NativeBridge.instance.callNativeMethod(methodName, rest);
+      return NativeBridge.instance.callNativeMethod(objectId, name, rest);
       
     }
     
-    public function set nativeId(value:String):void
+    public function set objectId(value:String):void
     {
-      __nativeId = value;
+      if (value == "")
+      {
+        value = null;
+      }
+      
+      __objectId = value;
     }
     
-    private var __nativeId:String;
+    private var __objectId:String;
     
     private static var __logger:ILogger = LoggingUtil.getClassLogger(NativeObject);
     

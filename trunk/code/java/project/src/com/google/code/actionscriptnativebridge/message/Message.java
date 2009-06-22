@@ -34,8 +34,25 @@ public abstract class Message
     __requestId = requestId;
   }
 
+  public String getObjectId()
+  {
+    return __objectId;
+  }
+
+  public void setObjectId(String objectId)
+  {
+    if ((objectId != null) && (objectId.trim().length() == 0))
+    {
+      objectId = null;
+    }
+    
+    __objectId = objectId;
+  }
+
   private Type __type;
 
   private int __requestId;
+
+  private String __objectId;
 
 }

@@ -145,10 +145,11 @@ package com.google.code.actionscriptnativebridge
     /**
      * Makes a call to a native method.
      * 
+     * @param objectId The ID of the object where the operation will be invoked.
      * @param name The method name.
      * @param args The arguments to method.
      */
-    public function callNativeMethod(name:String, args:Array):void
+    public function callNativeMethod(objectId:String, name:String, args:Array):void
     {
       __logger.debug("Call to native method started.");
       
@@ -156,6 +157,7 @@ package com.google.code.actionscriptnativebridge
       var arguments:Array = new Array();
       var resultCallback:ResultCallback = null;
       var faultCallback:FaultCallback = null;
+      var nativeObject:NativeObject = null;
       
       if (args != null)
       {
@@ -171,6 +173,11 @@ package com.google.code.actionscriptnativebridge
             __logger.debug("FaultCallback found.");
             faultCallback = FaultCallback(argument);
           }
+          else if(argument is NativeObject)
+          {
+            __logger.debug("Native Object found.");
+            nativeObject = NativeObject(argument);
+          }
           else
           {
             arguments.push(argument);
@@ -183,23 +190,29 @@ package com.google.code.actionscriptnativebridge
       if (Log.isInfo())
       {
         __logger.info(
-          "\nNative Operation:\n-----------------\nOperation: {0}, \nParameters: [{1}], \nResult Callback: {2}, \nFault Callback: {3}", 
+          "\nNative Operation:\n-----------------\nOperation: {0},\nParameters: [{1}],\nResult Callback: {2},\nFault Callback: {3},\nNative Object: {4}", 
           operation, 
           arguments, 
           (resultCallback != null), 
-          (faultCallback != null)
+          (faultCallback != null),
+          (nativeObject != null)
         );
       }
       
       var requestId:int = __nextRequestId;
       
-      var responder:NativeResponder = new NativeResponder(resultCallback, faultCallback);
+      var responder:NativeResponder = 
+        new NativeResponder(resultCallback, faultCallback, nativeObject);
       __pushResponder(requestId, responder);
       
       // Creates a message.
       var message:Object = new Object();
       message.type = MessageType.REQUEST;
       message.requestId = requestId;
+      if (objectId != null)
+      {
+        message.objectId = objectId ;
+      }
       message.operation = operation;
       message.arguments = arguments;
       
@@ -212,7 +225,7 @@ package com.google.code.actionscriptnativebridge
      */
     flash.utils.flash_proxy override function callProperty(name:*, ...rest):*
     {
-      callNativeMethod(name, rest);
+      callNativeMethod(null, name, rest);
     }
     
     /**
