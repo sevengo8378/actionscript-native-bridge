@@ -1,7 +1,18 @@
+/* ------------------------------------------------------------------------------------------------------
+ *
+ * File: NativeConnection.as
+ *
+ *                                             Revision History
+ * ------------------------------------------------------------------------------------------------------
+ * Author (username)                    Date      CR Number   Comments
+ * --------------------------------  ----------  -----------  -------------------------------------------
+ * Paulo Coutinho (pcmnac)           2009.04.10               Initial creation.
+ * ------------------------------------------------------------------------------------------------------
+ */
+ 
 package com.google.code.actionscriptnativebridge
 {
   
-  import com.google.code.actionscriptnativebridge.event.ExecutionErrorEvent;
   import com.google.code.actionscriptnativebridge.event.NativeMessageEvent;
   import com.google.code.actionscriptnativebridge.translator.IMessageTranslator;
   import com.google.code.actionscriptnativebridge.translator.JsonMessageTranslator;
@@ -17,18 +28,37 @@ package com.google.code.actionscriptnativebridge
   
   import mx.logging.ILogger;
   
+  // --------------------------------------------------------------------------------------------------
+  // Events
+  // --------------------------------------------------------------------------------------------------
+  
   [Event(name="close", type="flash.events.Event")]
   [Event(name="ioError", type="flash.events.IOErrorEvent")]
   [Event(name="securityError", type="flash.events.SecurityErrorEvent")]
   [Event(name="messageReceived", type="com.google.code.actionscriptnativebridge.event.NativeMessageEvent")]
   
-  
+  /**
+   * 
+   */
   public class NativeConnection extends EventDispatcher
   {
+    
+    // --------------------------------------------------------------------------------------------------
+    // Public API
+    // --------------------------------------------------------------------------------------------------
+    
+    /**
+     * Contructor.
+     * 
+     * @param host The native module host.
+     * @param port The native module port.
+     * @param charset The charset used in the message exchanging.
+     * @param translator The IMessageTranslator responsible for serialize and unserialize the messages.
+     */
     public function NativeConnection(
       host:String = "127.0.0.1", 
       port:int = 2302, 
-      charset:String = /*"iso-8850-1",*/"utf-8",
+      charset:String = "utf-8",
       translator:IMessageTranslator = null)
     {
       if (translator == null)
@@ -43,6 +73,9 @@ package com.google.code.actionscriptnativebridge
       __translator = translator;
     }
     
+    /**
+     * Opens the connection with the native module.
+     */
     public function open():void
     {
       __socket = new Socket();
@@ -57,6 +90,11 @@ package com.google.code.actionscriptnativebridge
       __socket.connect(__host, __port);
     }
     
+    /**
+     * Sends a message to the native module.
+     * 
+     * @param message The message to be sent.
+     */
     public function send(message:Object):void
     {
       var requestString:String = __translator.stringFromMessage(message); 
@@ -69,52 +107,63 @@ package com.google.code.actionscriptnativebridge
 
     }
     
+    // --------------------------------------------------------------------------------------------------
+    // Protected Members
+    // --------------------------------------------------------------------------------------------------
     
+    // --------------------------------------------------------------------------------------------------
+    // Private Members
+    // --------------------------------------------------------------------------------------------------
+    
+    /**
+     * Logger for this class.
+     */
     private static var __logger:ILogger = LoggingUtil.getClassLogger(NativeConnection);
     
     /**
-     * Terminador padrão para as mensagens recebidas do módulo background.
+     * The IMessageTranslator responsible for serialize and unserialize the messages.
      */
     private var __translator:IMessageTranslator;
     
     /**
-     * Socket utilizado para a comunicação.
+     * Socket object to manage the communication with the native module.
      */
     private var __socket:Socket;
     
     /**
-     * Endereço do servidor (socket).
+     * The native module host.
      */
     private var __host:String;
     
     /**
-     * Porta do servidor (socket).
+     * The native module port.
      */
     private var __port:int;
     
     /**
-     * Charset usado na comunicação.
+     * The charset used in the message exchanging.
      */
     private var __charset:String;
     
     /**
-     * Buffer para armazenar a resposta recebida. A respota pode chegar em vários pedaços, por
-     * isso é necessário um buffer para armazenar esses bytes.
+     * Buffer to store the received data until a complete message be received.
      */
     private var __responseDataBuffer:String = "";
     
     /**
-    * Passa o evento para frente.
-    */    
+     * Forwards the event.
+     * 
+     * @param e The event to be forwarded.
+     */    
     private function __forwardEvent(e:Event):void
     {
       dispatchEvent(e);
     }
     
     /**
-     * Trata os dados recebidos da aplicação background.
+     * Handles the data received from the socket connection.
      * 
-     * @param e Evento contendo os bytes recebidos.
+     * @param e The progress event.
      */
     private function __onSocketData(e:ProgressEvent):void
     {
@@ -123,36 +172,35 @@ package com.google.code.actionscriptnativebridge
         __logger.debug("{0} bytes received.", __socket.bytesAvailable);
         var messageBlock:ByteArray = new ByteArray();
         
-        // Enquanto existirem dados disponíveis...
+        // While there are bytes available ...
         while (__socket.bytesAvailable > 0)
         {
-          // Lê o byte.
+          // Reads the next byte.
           var b:int = __socket.readByte();
           
-          // Se for direfente de 0...
+          // If it is not equals to 0 (Zero)...
           if (b != 0)
           {
-            // Escreve o byte no bloco atual.
+            // Writes the byte to the block.
             messageBlock.writeByte(b);
           }
           else
           {
-            // Se for 0, ou seja, o final de um bloco...
-            // processa esse bloco.
+            // If the 0 (Zero) byte was found...
+            // Process the block.
             __processMessageBlock(messageBlock, true);
             
-            // Reinicia o bloco atual.
+            // Resets the block to receive the pending bytes.
             messageBlock = new ByteArray();
           }
         }
         
-        // Ao final é necessário processar o bloco, pois pode ser uma mensagem que foi quebrada em várias partes
-        // e nesse caso todos os bytes serão lidos porém não será encontrado o 0 (terminador de bloco).
+        // Processes the block.
         __processMessageBlock(messageBlock);
       }
       catch(error:Error)
       {
-        dispatchEvent(new ExecutionErrorEvent(error));
+        __logger.error("Execution error {0}: {1}", error.errorID, error.message);
       }
     }
 
@@ -172,7 +220,7 @@ package com.google.code.actionscriptnativebridge
         var receivedData:String = bytes.readMultiByte(bytes.bytesAvailable, __charset);
         __logger.debug("Data received: {0}", receivedData);
 
-        // Adiciona a mensagem ao buffer.
+        // Adds the received data to the buffer.
         __responseDataBuffer += receivedData;
         
         if (finish)
