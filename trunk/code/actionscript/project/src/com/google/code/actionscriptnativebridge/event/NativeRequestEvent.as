@@ -17,10 +17,10 @@ package com.google.code.actionscriptnativebridge.event
   import flash.events.Event;
 
   /**
-   * <p>Representa uma notificação enviada pelo módulo Background.
+   * <p>A native request received from the native module.
    * </p>
    *
-   * @author <a href="mailto:pcmnac@cesar.org.br">pcmnac</a>.
+   * @author <a href="mailto:pcmnac@gmail.com">pcmnac</a>.
    */
   public class NativeRequestEvent extends Event
   {
@@ -32,8 +32,10 @@ package com.google.code.actionscriptnativebridge.event
     /**
      * Construtor
      * 
-     * @param notificationId Identificador da notificação.
-     * @param data Dados da notificação.
+     * @param requestId The request identifier.
+     * @param operation The requested operation.
+     * @param arguments The request arguments.
+     * @param resultHandler The result handler.
      */
     public function NativeRequestEvent(
       requestId:int, 
@@ -49,9 +51,9 @@ package com.google.code.actionscriptnativebridge.event
     }
     
     /**
-     * Recupera o Id da notificação.
+     * Retrieved the request ID.
      * 
-     * @return O Id da notificação.
+     * @return The native request ID.
      */
     public function get requestId():int
     {
@@ -108,17 +110,23 @@ package com.google.code.actionscriptnativebridge.event
     // --------------------------------------------------------------------------------------------------
     
     /**
-     * identificador da notificação. Indica o tipo de notificação em questão.
+     * The request identifier.
      */
     private var __requestId:int;
     
     /**
-     * Dados enviados na notificação. Depende do tipo de notificação.
+     * The requested operation name.
      */
     private var __operation:String;
     
+    /**
+     * The request arguments.
+     */
     private var __arguments:Array;
     
+    /**
+     * The result handler for this request.
+     */
     private var __resultHandler:Function;
     
     private var __status:int = ResultStatus.SUCCESS;

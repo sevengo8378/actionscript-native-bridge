@@ -1,7 +1,5 @@
 package com.google.code.actionscriptnativebridge.callback
 {
-  import com.google.code.actionscriptnativebridge.event.ResultEvent;
-  
 
   public class ResultCallback extends Callback
   {
@@ -12,9 +10,6 @@ package com.google.code.actionscriptnativebridge.callback
     
     public override function handleResponse(requestId:int, status:int, data:Object):void
     {
-      var event:ResultEvent = new ResultEvent(requestId, data);
-      
-      //callback.call(null, event);
       callback.call(null, data);
     }
     

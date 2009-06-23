@@ -3,14 +3,10 @@
 <includeClasses>
 <classEntry path="com.google.code.actionscriptnativebridge.event.NativeRequestEvent"/>
 <classEntry path="com.google.code.actionscriptnativebridge.NativeConnection"/>
-<classEntry path="com.google.code.actionscriptnativebridge.event.ResultEvent"/>
-<classEntry path="com.google.code.actionscriptnativebridge.event.NativeEvent"/>
 <classEntry path="com.google.code.actionscriptnativebridge.translator.IMessageTranslator"/>
 <classEntry path="com.google.code.actionscriptnativebridge.event.NativeMessageEvent"/>
 <classEntry path="com.google.code.actionscriptnativebridge.error.AbstractMethodCallError"/>
 <classEntry path="com.google.code.actionscriptnativebridge.translator.JsonMessageTranslator"/>
-<classEntry path="com.google.code.actionscriptnativebridge.event.ExecutionErrorEvent"/>
-<classEntry path="com.google.code.actionscriptnativebridge.event.FaultEvent"/>
 <classEntry path="com.google.code.actionscriptnativebridge.NativeBridge"/>
 <classEntry path="com.google.code.actionscriptnativebridge.callback.ResultCallback"/>
 <classEntry path="com.google.code.actionscriptnativebridge.callback.FaultCallback"/>

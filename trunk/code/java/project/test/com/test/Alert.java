@@ -11,7 +11,7 @@ public class Alert
 
   public void show(String msg)
   {
-    message += msg;
+    message += "-" + msg;
 
     JOptionPane.showMessageDialog(null, message);
   }

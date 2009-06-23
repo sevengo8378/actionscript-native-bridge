@@ -1,3 +1,15 @@
+/* ------------------------------------------------------------------------------------------------------
+ *
+ * File: NativeBridge.as
+ *
+ *                                             Revision History
+ * ------------------------------------------------------------------------------------------------------
+ * Author (username)                    Date      CR Number   Comments
+ * --------------------------------  ----------  -----------  -------------------------------------------
+ * Paulo Coutinho (pcmnac)           2009.04.10               Initial creation.
+ * ------------------------------------------------------------------------------------------------------
+ */
+ 
 package com.google.code.actionscriptnativebridge
 {
   import com.google.code.actionscriptnativebridge.callback.FaultCallback;
@@ -19,15 +31,32 @@ package com.google.code.actionscriptnativebridge
   import mx.logging.Log;
   import mx.utils.ObjectUtil;
   
+  // --------------------------------------------------------------------------------------------------
+  // Events
+  // --------------------------------------------------------------------------------------------------
+    
   [Event(name="close", type="flash.events.Event")]
   [Event(name="ioError", type="flash.events.IOErrorEvent")]
   [Event(name="securityError", type="flash.events.SecurityErrorEvent")]
   
+  /**
+   * Native Bridge interface. Use this class to make calls to native methods and listen for native
+   * calls.
+   * 
+   * @author <a href="mailto:pcmnac@gmail.com">pcmnac++</a>.
+   */
   public dynamic class NativeBridge 
     extends Proxy 
     implements IEventDispatcher 
   {
+    // --------------------------------------------------------------------------------------------------
+    // Public API
+    // --------------------------------------------------------------------------------------------------
     
+    /**
+     * Constructor. Do NOT try to create object of this type. 
+     * Instead, use the instance() method to get the unique class instance.
+     */
     public function NativeBridge()
     {
       if (__INSTANCE != null)
@@ -59,6 +88,13 @@ package com.google.code.actionscriptnativebridge
       return __INSTANCE;
     } 
     
+    /**
+     * Adds a synchronous function handler to a specific native call. 
+     * The return of the function will be sent to native module automatically.
+     * 
+     * @param operation The external operation identifier.
+     * @param handler The function which will handle the native call.
+     */
     public function addHandler(operation:String, handler:Function):void
     {
       __nativeRequestDispatcher.addEventListener(
@@ -79,6 +115,16 @@ package com.google.code.actionscriptnativebridge
       );
     }
     
+    /**
+     * Adds a asynchronous function handler to a specific native call. 
+     * The return of the function will NOT be sent to native module automatically.
+     * In this case the function MUST receive, as the last parameter, a 
+     * NativeRequestEvent object and it MUST call the sendResponse() method of
+     * the received event to sent the result to the native module.
+     * 
+     * @param operation The external operation identifier.
+     * @param handler The function which will handle the native call.
+     */
     public function addAsynchronousHandler(operation:String, handler:Function):void
     {
       __nativeRequestDispatcher.addEventListener(
@@ -220,6 +266,10 @@ package com.google.code.actionscriptnativebridge
       __connection.send(message);
     }
     
+    // --------------------------------------------------------------------------------------------------
+    // Proxy Visibilty Members
+    // --------------------------------------------------------------------------------------------------
+    
     /**
      * @see Proxy::callProperty.
      */
@@ -227,6 +277,14 @@ package com.google.code.actionscriptnativebridge
     {
       callNativeMethod(null, name, rest);
     }
+    
+    // --------------------------------------------------------------------------------------------------
+    // Protected Members
+    // --------------------------------------------------------------------------------------------------
+    
+    // --------------------------------------------------------------------------------------------------
+    // Private Members
+    // --------------------------------------------------------------------------------------------------
     
     /**
      * The bridge instance.
@@ -268,6 +326,11 @@ package com.google.code.actionscriptnativebridge
      */
     private static var __requestCounter:int = 1;
     
+    /**
+     * Handles a received native message.
+     * 
+     * @param event The native message event.
+     */
     private function __handleMessage(event:NativeMessageEvent):void
     {
       var message:Object = event.message;
@@ -311,6 +374,11 @@ package com.google.code.actionscriptnativebridge
       }
     }
     
+    /**
+     * Forwards an event.
+     * 
+     * @param event The event to be forwarded.
+     */
     private function __forwardEvent(event:Event):void
     {
       dispatchEvent(event);
@@ -351,6 +419,11 @@ package com.google.code.actionscriptnativebridge
       return __requestCounter++;
     }
     
+    /**
+     * Processes a request received from the native module.
+     * 
+     * @param message The request message.
+     */
     private function __processRequest(message:Object):void
     {
       var requestId:int = message.requestId;

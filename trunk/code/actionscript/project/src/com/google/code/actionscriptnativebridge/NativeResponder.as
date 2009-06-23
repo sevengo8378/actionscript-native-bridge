@@ -1,3 +1,15 @@
+/* ------------------------------------------------------------------------------------------------------
+ *
+ * File: NativeResponder.as
+ *
+ *                                             Revision History
+ * ------------------------------------------------------------------------------------------------------
+ * Author (username)                    Date      CR Number   Comments
+ * --------------------------------  ----------  -----------  -------------------------------------------
+ * Paulo Coutinho (pcmnac)           2009.04.10               Initial creation.
+ * ------------------------------------------------------------------------------------------------------
+ */
+ 
 package com.google.code.actionscriptnativebridge
 {
   import com.google.code.actionscriptnativebridge.callback.Callback;
@@ -9,8 +21,27 @@ package com.google.code.actionscriptnativebridge
   import mx.logging.Log;
   import mx.utils.ObjectUtil;
   
+  /**
+   * <p>Used to wait for native module responses. For each sent request, is created
+   * a responder to wait for the response to this request.
+   * </p>
+   *
+   * @author <a href="mailto:pcmnac@gmail.com">pcmnac++</a>.
+   */
   public class NativeResponder
   {
+    
+    // --------------------------------------------------------------------------------------------------
+    // Public API
+    // --------------------------------------------------------------------------------------------------
+    
+    /**
+     * Constructor.
+     * 
+     * @param resultCallback The result callback reference.
+     * @param faultCallback The fault callback reference.
+     * @param nativeObject The native object which generated the request.
+     */
     public function NativeResponder(
       resultCallback:ResultCallback, 
       faultCallback:FaultCallback,
@@ -21,6 +52,12 @@ package com.google.code.actionscriptnativebridge
       __nativeObject = nativeObject;
     }
     
+    /**
+     * Processes the response message. This method is reponsible for calling the
+     * callbacks and setting the object IDs.
+     * 
+     * @param message The response message.
+     */
     public function processResponse(message:Object):void
     {
       var requestId:int = message.requestId;
@@ -51,12 +88,32 @@ package com.google.code.actionscriptnativebridge
 
     }
     
+    // --------------------------------------------------------------------------------------------------
+    // Protected Members
+    // --------------------------------------------------------------------------------------------------
+    
+    // --------------------------------------------------------------------------------------------------
+    // Private Members
+    // --------------------------------------------------------------------------------------------------
+    
+    /**
+     * The Logger for this class.
+     */
     private static var __logger:ILogger = LoggingUtil.getClassLogger(NativeResponder);
   
+    /**
+     * The result callback.
+     */
     private var __resultCallback:ResultCallback;
     
+    /**
+     * The fault callback.
+     */
     private var __faultCallback:FaultCallback;
     
+    /**
+     * The native object which generated the request.
+     */
     private var __nativeObject:NativeObject;
 
   }
