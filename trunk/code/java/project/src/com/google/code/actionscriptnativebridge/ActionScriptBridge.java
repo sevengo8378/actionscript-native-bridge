@@ -1,3 +1,15 @@
+/* ------------------------------------------------------------------------------------------------------
+ *
+ * File: ActionScriptBridge.as
+ *
+ *                                             Revision History
+ * ------------------------------------------------------------------------------------------------------
+ * Author (username)                    Date      CR Number   Comments
+ * --------------------------------  ----------  -----------  -------------------------------------------
+ * Paulo Coutinho (pcmnac)           2009.04.10               Initial creation.
+ * ------------------------------------------------------------------------------------------------------
+ */
+
 package com.google.code.actionscriptnativebridge;
 
 import java.io.IOException;
@@ -20,24 +32,56 @@ import com.google.code.actionscriptnativebridge.message.Message;
 import com.google.code.actionscriptnativebridge.message.RequestMessage;
 import com.google.code.actionscriptnativebridge.message.ResponseMessage;
 
+/**
+ * ActionScript Bridge interface. Use this class to make calls to ActionScript
+ * methods and listen for ActionScript calls.
+ * 
+ * @author <a href="mailto:pcmnac@gmail.com">pcmnac++</a>.
+ * 
+ */
 public class ActionScriptBridge implements MessageListener
 {
 
+  /**
+   * Retrieves the unique instance of {@link ActionScriptBridge} class.
+   * 
+   * @return The unique instance of {@link ActionScriptBridge} class.
+   */
   public static ActionScriptBridge getInstance()
   {
     return __INSTANCE;
   }
 
-  public void start() throws IOException, ClassNotFoundException
+  /**
+   * Starts bridge communication.
+   * 
+   * @throws IOException
+   *           If an error occurs during the file scanning process or the
+   *           connection.
+   */
+  public void start() throws IOException
   {
-
     // Maps the methods
     MethodsMapper.mapNativeMethods();
 
     __connection.open();
-
   }
 
+  /**
+   * Makes a call to an ActionScript method.
+   * 
+   * @param objectId
+   *          The ID of the object where the method will be called.
+   * @param name
+   *          The name of the requested method.
+   * @param arguments
+   *          The arguments to be passed to the ActionScript method.
+   * 
+   * @return The method's result.
+   * 
+   * @throws IOException
+   *           If an error occurs on the connection.
+   */
   public Object callActionscriptMethod(String objectId, String name,
       Object... arguments) throws IOException
   {

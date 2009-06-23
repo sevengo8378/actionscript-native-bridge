@@ -18,7 +18,16 @@ import com.google.code.actionscriptnativebridge.annotation.ActionScriptService;
 public class MethodsMapper
 {
 
-  public static void mapNativeMethods() throws IOException, ClassNotFoundException
+  /**
+   * Scans the classes on the classpath to find the classes annotated with
+   * {@link ActionScriptService} and methods annotated with
+   * {@link ActionScriptMethod}.
+   * 
+   * @throws IOException
+   *           If an error occurs during the file scanning process.
+   */
+  public static void mapNativeMethods() throws IOException
+
   {
     __logger.info("Mapping native methods...");
     // scan java.class.path
@@ -27,48 +36,81 @@ public class MethodsMapper
 
     db.scanArchives(urls);
 
-    Set<String> annotatedClasses = db.getAnnotationIndex().get(ActionScriptService.class.getName());
+    Set<String> annotatedClasses = db.getAnnotationIndex().get(
+        ActionScriptService.class.getName());
 
     if (annotatedClasses != null && annotatedClasses.size() > 0)
     {
       for (String className : annotatedClasses)
       {
-        __logger.debug("New Class Found: " + className);
-        Class<?> clazz = Class.forName(className);
-
-        __logger.debug("Class methods:");
-        for (Method method : clazz.getMethods())
+        try
         {
-          ActionScriptMethod actionScriptMethod = method.getAnnotation(ActionScriptMethod.class);
-          if (actionScriptMethod != null)
-          {
-            __logger.debug(method.getName() + "(" + actionScriptMethod.name() + ")");
-            String key = (!actionScriptMethod.name().equals("")) ? actionScriptMethod.name() : method.getName();
-            __methodsMap.put(key, method);
+          __logger.debug("New Class Found: " + className);
+          Class<?> clazz = Class.forName(className);
 
+          __logger.debug("Class methods:");
+          for (Method method : clazz.getMethods())
+          {
+            ActionScriptMethod actionScriptMethod = method
+                .getAnnotation(ActionScriptMethod.class);
+            if (actionScriptMethod != null)
+            {
+              __logger.debug(method.getName() + "(" + actionScriptMethod.name()
+                  + ")");
+              String key = (!actionScriptMethod.name().equals("")) ? actionScriptMethod
+                  .name()
+                  : method.getName();
+              __methodsMap.put(key, method);
+
+            }
           }
+        }
+        catch (ClassNotFoundException e)
+        {
+          __logger.error("Error parsing the class", e);
         }
       }
     }
     else
     {
-      System.out.println("No annotated classes....");
+      __logger.info("No annotated classes were found...");
     }
 
   }
 
+  /**
+   * Retrieves a method based on the given name (key).
+   * 
+   * @param name
+   *          The method name.
+   * 
+   * @return The corresponding method or <code>null</code>.
+   */
   public static Method getMethod(String name)
   {
     return __methodsMap.get(name);
   }
 
+  /**
+   * Retrieves a method based on the given name (key).
+   * 
+   * @param name
+   * @param arguments
+   * @return
+   */
   public static Method getMethod(String name, Object[] arguments)
   {
     return __methodsMap.get(name);
   }
 
+  /**
+   * Map with methods available in ActionScript.
+   */
   private static Map<String, Method> __methodsMap = new HashMap<String, Method>();
 
+  /**
+   * Logger for this class.
+   */
   private static Log __logger = LogFactory.getLog(MethodsMapper.class);
 
 }
