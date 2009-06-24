@@ -63,7 +63,7 @@ package com.google.code.actionscriptnativebridge
       var requestId:int = message.requestId;
       var data:Object = message.data;
       var status:int = message.statusCode;
-      var callback:Callback = (status == 0) ? __resultCallback : __faultCallback;
+      var callback:Callback = (status == ResultStatus.SUCCESS) ? __resultCallback : __faultCallback;
 
       if (Log.isDebug())
       {
@@ -83,7 +83,7 @@ package com.google.code.actionscriptnativebridge
       if (callback != null)
       {
         __logger.debug("Calling {0} callback", ((status == 0) ? "result" : "fault"));
-        callback.handleResponse(requestId, status, data);
+        callback.call(data);
       }
 
     }
