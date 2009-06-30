@@ -2,14 +2,12 @@
 <mx:WindowedApplication xmlns:mx="http://www.adobe.com/2006/mxml" layout="vertical" creationComplete="init();">
   <mx:Script>
     <![CDATA[
-        import com.test.Alert;
+      import com.test.Alert;
       import com.test.MyOtherClass;
       import mx.containers.Tile;
-      import com.google.code.actionscriptnativebridge.event.ResultEvent;
       import com.google.code.actionscriptnativebridge.NativeBridge;
       import com.google.code.actionscriptnativebridge.callback.ResultCallback;
       import com.google.code.actionscriptnativebridge.callback.FaultCallback;
-      import com.google.code.actionscriptnativebridge.event.FaultEvent;
       import com.google.code.actionscriptnativebridge.event.NativeRequestEvent;
       
       import mx.logging.LogEventLevel;

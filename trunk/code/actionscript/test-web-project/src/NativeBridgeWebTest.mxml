@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Application xmlns:mx="http://www.adobe.com/2006/mxml" layout="vertical" creationComplete="__init();" xmlns:actionscriptnativebridge="com.google.code.actionscriptnativebridge.*">
+  <mx:Script>
+    <![CDATA[
+      import com.google.code.actionscriptnativebridge.NativeBridge;
+      private function __init():void
+      {
+        NativeBridge.instance.addEventListener(
+          SecurityErrorEvent.SECURITY_ERROR,
+          function(e:SecurityErrorEvent):void
+          {
+            __log(e.text);
+          }
+        );
+        
+        NativeBridge.instance.addEventListener(
+          IOErrorEvent.IO_ERROR,
+          function(e:IOErrorEvent):void
+          {
+            __log(e.text + e.toString());
+          }
+        );
+        
+        NativeBridge.instance.showMessage("pcmnac++");
+      }
+      
+      private function __log(message:String):void
+      {
+        txaOutput.text += message + "\n";
+      }
+    ]]>
+  </mx:Script>
+  
+  <mx:TextArea id="txaOutput" width="100%" height="100%" />
+  
+</mx:Application>
