@@ -84,6 +84,7 @@ package com.google.code.actionscriptnativebridge
       __socket.addEventListener(IOErrorEvent.IO_ERROR, __forwardEvent);
       __socket.addEventListener(Event.CLOSE, __forwardEvent);
       
+      __socket.addEventListener(Event.CONNECT, __onSocketConnect);
       __socket.addEventListener(ProgressEvent.SOCKET_DATA, __onSocketData);
      
       __logger.info("Opening socket connection to {0}:{1}.", __host, __port); 
@@ -97,14 +98,20 @@ package com.google.code.actionscriptnativebridge
      */
     public function send(message:Object):void
     {
-      var requestString:String = __translator.stringFromMessage(message); 
-
-      __logger.info("Native request sent:\n{0}", requestString);
-
-      __socket.writeMultiByte(requestString, __charset);
-      __socket.writeByte(0);
-      __socket.flush();
-
+      if (__connected)
+      {
+        var requestString:String = __translator.stringFromMessage(message); 
+  
+        __logger.info("Native request sent:\n{0}", requestString);
+  
+        __socket.writeMultiByte(requestString, __charset);
+        __socket.writeByte(0);
+        __socket.flush();
+      }
+      else
+      {
+        __pendingRequests.push(message);
+      }
     }
     
     // --------------------------------------------------------------------------------------------------
@@ -150,6 +157,10 @@ package com.google.code.actionscriptnativebridge
      */
     private var __responseDataBuffer:String = "";
     
+    private var __pendingRequests:Array = new Array();
+    
+    private var __connected:Boolean;
+    
     /**
      * Forwards the event.
      * 
@@ -158,6 +169,18 @@ package com.google.code.actionscriptnativebridge
     private function __forwardEvent(e:Event):void
     {
       dispatchEvent(e);
+    }
+    
+    private function __onSocketConnect(e:Event):void
+    {
+      __connected = true;
+      
+      for each (var message:Object in __pendingRequests)
+      {
+        send(message);
+      }
+      
+      __pendingRequests = new Array();
     }
     
     /**

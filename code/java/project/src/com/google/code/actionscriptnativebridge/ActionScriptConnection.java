@@ -5,6 +5,7 @@ import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.UnsupportedEncodingException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
@@ -92,7 +93,7 @@ public class ActionScriptConnection implements Runnable
         {
           try
           {
-            listener.clientConnected();
+            // listener.clientConnected();
           }
           catch (Exception e)
           {
@@ -103,20 +104,39 @@ public class ActionScriptConnection implements Runnable
         __input = __client.getInputStream();
         __output = __client.getOutputStream();
 
-        while (true)
+        boolean reading = true;
+
+        while (reading)
         {
           // Read a message from Actionscript side.
           __logger.debug("Waiting for client message...");
           String messageString = __readMessage(__input);
 
-          // Creates a new Message object.
           __logger.debug("Message received: " + messageString);
-          Message message = __translator.messageFromString(messageString);
 
-          if (message != null)
+          if (messageString.equals(__POLICY_FILE_REQUEST))
           {
-            // Notifies the listener method.
-            __messageListener.messageReceived(message);
+            __sendPolicyRules();
+            reading = false;
+          }
+          else
+          {
+            // Creates a new Message object.
+
+            Message message = __translator.messageFromString(messageString);
+
+            if (message != null)
+            {
+              try
+              {
+                // Notifies the listener method.
+                __messageListener.messageReceived(message);
+              }
+              catch (Exception e)
+              {
+                __logger.error("Error handling message", e);
+              }
+            }
           }
         }
 
@@ -190,6 +210,8 @@ public class ActionScriptConnection implements Runnable
     __bridgeListeners.remove(listener);
   }
 
+  private static final String __POLICY_FILE_REQUEST = "<policy-file-request/>";
+
   private List<ActionScriptBridgeListener> __bridgeListeners = new ArrayList<ActionScriptBridgeListener>();
 
   private Log __logger = LogFactory.getLog(ActionScriptConnection.class);
@@ -239,4 +261,13 @@ public class ActionScriptConnection implements Runnable
     return new String(buffer.toByteArray(), Configuration.charset);
   }
 
+  private void __sendPolicyRules() throws UnsupportedEncodingException, IOException
+  {
+    String policyRules = "<?xml version=\"1.0\"?><cross-domain-policy>"
+        + "<allow-access-from domain=\"*\" to-ports=\"" + Configuration.port + "\" />"
+        + "</cross-domain-policy>\u0000";
+
+    __output.write(policyRules.getBytes(Configuration.charset));
+    __output.flush();
+  }
 }
