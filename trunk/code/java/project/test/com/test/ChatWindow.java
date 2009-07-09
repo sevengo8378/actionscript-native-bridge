@@ -4,7 +4,6 @@ import java.awt.Container;
 import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.IOException;
 
 import javax.swing.JButton;
 import javax.swing.JFrame;
@@ -54,18 +53,9 @@ public class ChatWindow extends JFrame
       @Override
       public void actionPerformed(ActionEvent arg0)
       {
-        try
-        {
-          ActionScriptBridge.getInstance().callActionscriptMethod(null, "newMessage", textField.getText());
-          textArea.setText("<<< " + textField.getText() + "\n" + textArea.getText());
-          textField.setText("");
-        }
-        catch (IOException e)
-        {
-          // TODO Auto-generated catch block
-          e.printStackTrace();
-        }
-
+        ActionScriptBridge.getInstance().callActionscriptMethod(null, "newMessage", textField.getText());
+        textArea.setText("<<< " + textField.getText() + "\n" + textArea.getText());
+        textField.setText("");
       }
     });
     c.add(button);

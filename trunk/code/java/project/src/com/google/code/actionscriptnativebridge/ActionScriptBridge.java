@@ -33,8 +33,8 @@ import com.google.code.actionscriptnativebridge.message.RequestMessage;
 import com.google.code.actionscriptnativebridge.message.ResponseMessage;
 
 /**
- * ActionScript Bridge interface. Use this class to make calls to ActionScript
- * methods and listen for ActionScript calls.
+ * ActionScript Bridge interface. Use this class to make calls to ActionScript methods and listen for
+ * ActionScript calls.
  * 
  * @author <a href="mailto:pcmnac@gmail.com">pcmnac++</a>.
  * 
@@ -56,8 +56,7 @@ public class ActionScriptBridge implements MessageListener
    * Starts bridge communication.
    * 
    * @throws IOException
-   *           If an error occurs during the file scanning process or the
-   *           connection.
+   *           If an error occurs during the file scanning process or the connection.
    */
   public void start() throws IOException
   {
@@ -82,17 +81,22 @@ public class ActionScriptBridge implements MessageListener
    * @throws IOException
    *           If an error occurs on the connection.
    */
-  public Object callActionscriptMethod(String objectId, String name,
-      Object... arguments) throws IOException
+  public Object callActionscriptMethod(String objectId, String name, Object... arguments)
   {
 
     Object result = null;
 
     int requestId = __nextRequestId();
-    RequestMessage message = new RequestMessage(requestId, objectId, name,
-        arguments);
+    RequestMessage message = new RequestMessage(requestId, objectId, name, arguments);
 
-    __connection.sendMessage(message);
+    try
+    {
+      __connection.sendMessage(message);
+    }
+    catch (Exception e)
+    {
+      throw new RuntimeException("Error sending message...");
+    }
 
     __pendingRequestMap.put(requestId, null);
 
@@ -120,8 +124,7 @@ public class ActionScriptBridge implements MessageListener
       }
       else
       {
-        throw new RuntimeException("Actionscript Error: "
-            + responseMessage.getData());
+        throw new RuntimeException("Actionscript Error: " + responseMessage.getData());
       }
     }
 
@@ -200,18 +203,19 @@ public class ActionScriptBridge implements MessageListener
 
       Object result = __invokeOperation(target, methodName, arguments);
 
-      responseMessage = new ResponseMessage(requestMessage.getRequestId(),
-          requestMessage.getObjectId(), StatusCodes.SUCCESS, result);
+      responseMessage = new ResponseMessage(requestMessage.getRequestId(), requestMessage.getObjectId(),
+          StatusCodes.SUCCESS, result);
     }
     catch (Exception e)
     {
-      responseMessage = new ResponseMessage(requestMessage.getRequestId(),
-          requestMessage.getObjectId(), StatusCodes.FAILURE, e);
+      responseMessage = new ResponseMessage(requestMessage.getRequestId(), requestMessage.getObjectId(),
+          StatusCodes.FAILURE, e);
     }
 
     try
     {
       __connection.sendMessage(responseMessage);
+      System.out.println("rteste,,,,,,");
     }
     catch (IOException e)
     {
@@ -244,8 +248,7 @@ public class ActionScriptBridge implements MessageListener
           declaringClass = Class.forName(objectId);
           target = declaringClass.newInstance();
 
-          StatefulObject annotation = declaringClass
-              .getAnnotation(StatefulObject.class);
+          StatefulObject annotation = declaringClass.getAnnotation(StatefulObject.class);
 
           if (annotation != null)
           {
@@ -262,8 +265,7 @@ public class ActionScriptBridge implements MessageListener
         catch (Exception e)
         {
           __logger.error("Error getting destination object", e);
-          throw new RuntimeException(
-              "Target object does not exist or is not available.", e);
+          throw new RuntimeException("Target object does not exist or is not available.", e);
         }
       }
     }
@@ -279,19 +281,18 @@ public class ActionScriptBridge implements MessageListener
       catch (Exception e)
       {
         __logger.error("Method does not exist or is not available", e);
-        throw new RuntimeException(
-            "Method does not exist or is not available.", e);
+        throw new RuntimeException("Method does not exist or is not available.", e);
       }
     }
 
     return target;
   }
 
-  public Object __invokeOperation(Object object, String operation,
-      Object[] parameters) throws MethodNotFoundException, ExecutionException
+  public Object __invokeOperation(Object object, String operation, Object[] parameters)
+      throws MethodNotFoundException, ExecutionException
   {
-    __logger.debug("Executing the operation \"" + operation
-        + "\" with the parameters " + ArrayUtils.toString(parameters));
+    __logger.debug("Executing the operation \"" + operation + "\" with the parameters "
+        + ArrayUtils.toString(parameters));
 
     Object result = null;
 

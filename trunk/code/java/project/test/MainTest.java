@@ -10,8 +10,7 @@ import com.test.ChatWindow;
 public class MainTest
 {
 
-  public static void main(String[] args) throws IOException,
-      ClassNotFoundException
+  public static void main(String[] args) throws IOException, ClassNotFoundException
   {
 
     try
@@ -50,19 +49,9 @@ public class MainTest
 
             public void run()
             {
-              try
-              {
-                System.out.println(bridge.callActionscriptMethod(null, "sum",
-                    1, 3));
-                System.out.println(bridge.callActionscriptMethod(null, "mult",
-                    2, 3));
-                System.out.println("Ok....");
-              }
-              catch (IOException e)
-              {
-                e.printStackTrace();
-              }
-
+              System.out.println(bridge.callActionscriptMethod(null, "sum", 1, 3));
+              System.out.println(bridge.callActionscriptMethod(null, "mult", 2, 3));
+              System.out.println("Ok....");
             }
 
           }).start();

@@ -64,11 +64,11 @@ public class ActionScriptConnection implements Runnable
   {
     String messageString = __translator.stringFromMessage(message) + "\u0000";
 
-    __logger.debug("Message sent: " + messageString);
-
     __output.write(messageString.getBytes(Configuration.charset));
 
     __output.flush();
+
+    __logger.debug("Message sent: " + messageString);
   }
 
   public void run()
@@ -123,14 +123,22 @@ public class ActionScriptConnection implements Runnable
           {
             // Creates a new Message object.
 
-            Message message = __translator.messageFromString(messageString);
+            final Message message = __translator.messageFromString(messageString);
 
             if (message != null)
             {
               try
               {
-                // Notifies the listener method.
-                __messageListener.messageReceived(message);
+                new Thread(new Runnable()
+                {
+                  @Override
+                  public void run()
+                  {
+                    // Notifies the listener method.
+                    __messageListener.messageReceived(message);
+                  }
+                }).start();
+
               }
               catch (Exception e)
               {
