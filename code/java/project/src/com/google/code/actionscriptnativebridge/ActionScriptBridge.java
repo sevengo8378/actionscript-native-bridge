@@ -190,12 +190,13 @@ public class ActionScriptBridge implements MessageListener
 
     try
     {
+      String originalObjectId = requestMessage.getObjectId();
       Object target = __getTargetObject(requestMessage);
 
       String methodName = requestMessage.getOperation();
       Object[] arguments = requestMessage.getArguments();
 
-      if (requestMessage.getObjectId() == null)
+      if (originalObjectId == null)
       {
         Method method = MethodsMapper.getMethod(requestMessage.getOperation());
         methodName = method.getName();
@@ -215,7 +216,6 @@ public class ActionScriptBridge implements MessageListener
     try
     {
       __connection.sendMessage(responseMessage);
-      System.out.println("rteste,,,,,,");
     }
     catch (IOException e)
     {
