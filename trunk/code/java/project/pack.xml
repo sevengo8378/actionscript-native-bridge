@@ -6,8 +6,12 @@
   <property name="javadocdir" value="../api-documentation" />
   <property name="buildversion" value="00-01" />
   <property name="distdir" value="../dist" />
+
+  <target name="clean">
+    <delete dir="${builddir}" />
+  </target>
   
-  <target name="compile">
+  <target name="compile" depends="clean">
     <mkdir dir="${builddir}"/>
     <javac source="1.5" srcdir="${src}" destdir="${builddir}"  />
   </target>
