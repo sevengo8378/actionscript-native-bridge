@@ -1,33 +1,39 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <project default="jar" name="actionscript-native-bridge">
-  
-  <property name="src" value="src" />
-  <property name="builddir" value="bin" />
-  <property name="javadocdir" value="../api-documentation" />
-  <property name="buildversion" value="00-01" />
-  <property name="distdir" value="../dist" />
 
-  <target name="clean">
-    <delete dir="${builddir}" />
-  </target>
-  
-  <target name="compile" depends="clean">
-    <mkdir dir="${builddir}"/>
-    <javac source="1.5" srcdir="${src}" destdir="${builddir}"  />
-  </target>
+    <property name="src" value="src" />
+    <property name="lib" value="lib" />
+    <property name="builddir" value="bin" />
+    <property name="javadocdir" value="../api-documentation" />
+    <property name="buildversion" value="00-01" />
+    <property name="distdir" value="../dist" />
 
-  <target name="javadoc">
-    <javadoc access="private" author="true" classpath="." destdir="${javadocdir}" 
-      doctitle="ActionScript Native Bridge"  source="1.5" sourcepath="${src}"/>
-  </target>
+    <target name="clean">
+        <delete dir="${builddir}" />
+    </target>
 
-  <target name="jar" depends="compile">
-    <mkdir dir="${distdir}"/>
-    <jar destfile="${distdir}/${ant.project.name}-${buildversion}.jar" basedir="${builddir}" excludes="**/test/**" />
-  </target>
-  
-  <target name="pack" depends="jar,javadoc">
-    <zip destfile="${distdir}/${ant.project.name}-java-${buildversion}.zip" basedir="../" excludes="**/*.zip,**/bin/**" />
-  </target>
-  
+    <target name="compile" depends="clean">
+        <mkdir dir="${builddir}" />
+        <javac source="1.5" srcdir="${src}" destdir="${builddir}">
+            <classpath>
+                <fileset dir="${lib}">
+                    <include name="**/*.jar"/>
+                </fileset>
+            </classpath>
+        </javac>
+    </target>
+
+    <target name="javadoc">
+        <javadoc access="private" author="true" classpath="." destdir="${javadocdir}" doctitle="ActionScript Native Bridge" source="1.5" sourcepath="${src}" />
+    </target>
+
+    <target name="jar" depends="compile">
+        <mkdir dir="${distdir}" />
+        <jar destfile="${distdir}/${ant.project.name}-${buildversion}.jar" basedir="${builddir}" excludes="**/test/**" />
+    </target>
+
+    <target name="pack" depends="jar,javadoc">
+        <zip destfile="${distdir}/${ant.project.name}-java-${buildversion}.zip" basedir="../" excludes="**/*.zip,**/bin/**" />
+    </target>
+
 </project>
